@@ -1,0 +1,132 @@
+@model IEnumerable<ApartmentManagement.Models.Apartment>
+
+@{
+    ViewData["Title"] = "Studioo Apartments";
+    ViewData["PageType"] = "Category";
+    var categoryType = ViewData["CategoryType"]?.ToString() ?? "Studioo";
+}
+
+<div class="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-blue-900 text-slate-100">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-blue-900 to-slate-900 text-white py-16 px-6 md:px-16 lg:px-24">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center gap-3 mb-4">
+                <a href="@Url.Action("Index", "Home")" class="text-blue-200 hover:text-white transition-colors duration-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </a>
+                <span class="text-blue-200">Home</span>
+                <span class="text-blue-300">/</span>
+                <span class="text-white">@categoryType Apartments</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">@categoryType Apartments</h1>
+            <p class="text-lg text-blue-100 max-w-2xl">Purpose-built studios with acoustic treatment, ergonomic furniture, and enterprise connectivity</p>
+        </div>
+    </div>
+
+    <!-- Apartments Grid -->
+    <div class="max-w-7xl mx-auto px-6 md:px-16 lg:px-24 py-12">
+        @if (Model != null && Model.Any())
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                @foreach (var apartment in Model)
+                {
+                    <div class="bg-slate-950/60 backdrop-blur rounded-2xl border border-blue-800/40 shadow-2xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-blue-900/60 hover:border-blue-400 group">
+                        <!-- Apartment Image -->
+                        <div class="relative h-64 bg-cover bg-center overflow-hidden">
+                            @if (!string.IsNullOrEmpty(apartment.Photos))
+                            {
+                                var photos = System.Text.Json.JsonSerializer.Deserialize<List<string>>(apartment.Photos);
+                                if (photos != null && photos.Any())
+                                {
+                                    <img src="@Url.Content(photos[0])" alt="@apartment.ApartmentNumber" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                }
+                                else
+                                {
+                                    <div class="w-full h-full bg-gradient-to-br from-blue-600/40 to-slate-800 flex items-center justify-center">
+                                        <svg class="w-20 h-20 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m0 4v12m-6-6h12"></path>
+                                        </svg>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="w-full h-full bg-gradient-to-br from-blue-600/40 to-slate-800 flex items-center justify-center">
+                                    <svg class="w-20 h-20 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m0 4v12m-6-6h12"></path>
+                                    </svg>
+                                </div>
+                            }
+                            <div class="absolute top-4 right-4">
+                                <span class="px-3 py-1 bg-blue-600 text-white text-xs font-bold uppercase rounded-full shadow-lg">
+                                    @apartment.Status
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Apartment Details -->
+                        <div class="p-6 bg-slate-900/80">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <h3 class="text-xl font-bold text-white mb-1">@apartment.ApartmentNumber</h3>
+                                    <p class="text-sm text-blue-200">@apartment.Building?.Name</p>
+                                </div>
+                                <span class="px-3 py-1 bg-blue-500/20 text-blue-100 text-xs font-semibold rounded-full">
+                                    @apartment.Type
+                                </span>
+                            </div>
+
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center text-blue-200">
+                                    <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                    </svg>
+                                    <span class="text-sm">Floor @apartment.FloorNumber</span>
+                                </div>
+                                <div class="flex items-center text-blue-200">
+                                    <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                                    </svg>
+                                    <span class="text-sm">@apartment.Size sq ft</span>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(apartment.Description))
+                            {
+                                <p class="text-slate-200 text-sm mb-4 line-clamp-2">@apartment.Description</p>
+                            }
+
+                            <div class="flex items-center justify-between pt-4 border-t border-blue-900/40">
+                                <div>
+                                    <p class="text-2xl font-bold text-white">$@apartment.BaseRentRate</p>
+                                    <p class="text-xs text-blue-200">per month</p>
+                                </div>
+                                <a href="@Url.Action("ApartmentDetails", "User", new { id = apartment.Id })" 
+                                   class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-20">
+                <svg class="w-24 h-24 mx-auto text-blue-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="text-2xl font-bold text-white mb-2">No @categoryType Apartments Available</h3>
+                <p class="text-blue-100 mb-6">We're sorry, but there are currently no @categoryType apartments available.</p>
+                <a href="@Url.Action("Index", "Home")" 
+                   class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-all duration-300 shadow-md hover:shadow-lg">
+                    Return to Home
+                </a>
+            </div>
+        }
+    </div>
+</div>
+

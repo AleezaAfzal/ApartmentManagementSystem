@@ -1,0 +1,272 @@
+@model ApartmentManagement.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register";
+    ViewData["PageType"] = "Auth";
+}
+
+<style>
+    :root {
+        --default-font: "Roboto", sans-serif;
+        --heading-font: "Raleway", sans-serif;
+        --heading-color: #111827;
+        --default-color: #4b5563;
+        --accent-color: #264653; 
+    }
+
+    .register-section {
+        background: url('https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80') center center;
+        background-size: cover;
+        position: relative;
+        min-height: 100vh;
+        padding: 60px 0;
+        font-family: var(--default-font);
+    }
+
+    .register-overlay {
+        position: absolute;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(2px);
+    }
+
+    .register-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 12px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .register-title {
+        font-family: var(--heading-font);
+        color: var(--heading-color);
+        font-weight: 700;
+    }
+
+  
+    .form-floating > label {
+        color: var(--default-color);
+        opacity: 0.8;
+    }
+
+    .form-control:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 0.25rem rgba(46, 202, 106, 0.25);
+    }
+
+    .form-check-input:checked {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+    }
+
+    .btn-theme {
+        background-color: var(--accent-color);
+        color: white;
+        font-family: var(--heading-font);
+        font-weight: 600;
+        border: none;
+        padding: 12px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-theme:hover {
+            background-color: #25a25a;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 202, 106, 0.3);
+        }
+
+    .link-theme {
+        color: var(--accent-color);
+        text-decoration: none;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+        .link-theme:hover {
+            color: #25a25a;
+            text-decoration: underline;
+        }
+
+    #ownerFields {
+        display: none;
+        transition: all 0.5s ease-in-out;
+    }
+
+  
+    .form-control[type="file"] {
+        padding: 10px;
+    }
+</style>
+
+<main class="main">
+    <section class="register-section d-flex align-items-center justify-content-center">
+        <div class="register-overlay"></div>
+        <div class="container position-relative">
+            <div class="row justify-content-center">
+                <div class="col-lg-6 col-md-8 col-sm-10">
+                    <div class="card register-card p-4 p-md-5" data-aos="fade-up" data-aos-duration="1000">
+                        <div class="card-body p-0">
+                            <div class="text-center mb-4" data-aos="fade-down" data-aos-delay="100">
+                                <h2 class="register-title mb-1">Create Account</h2>
+                                <p class="text-muted small">Join our community today</p>
+                            </div>
+
+                            <form asp-action="Register" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                                <div asp-validation-summary="ModelOnly" class="alert alert-danger text-sm mb-3 border-0 shadow-sm" role="alert"></div>
+
+                                <div class="row g-2">
+                                    <div class="col-md-12 mb-3" data-aos="fade-up" data-aos-delay="200">
+                                        <div class="form-floating">
+                                            <input asp-for="FullName" class="form-control" id="floatingName" placeholder="Full Name" required />
+                                            <label asp-for="FullName" for="floatingName">Full Name</label>
+                                            <span asp-validation-for="FullName" class="text-danger small ms-1"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3" data-aos="fade-up" data-aos-delay="300">
+                                        <div class="form-floating">
+                                            <input asp-for="Email" class="form-control" id="floatingEmail" placeholder="name@example.com" required />
+                                            <label asp-for="Email" for="floatingEmail">Email Address</label>
+                                            <span asp-validation-for="Email" class="text-danger small ms-1"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3" data-aos="fade-up" data-aos-delay="300">
+                                        <div class="form-floating">
+                                            <input asp-for="PhoneNumber" class="form-control" id="floatingPhone" placeholder="Phone" required />
+                                            <label asp-for="PhoneNumber" for="floatingPhone">Phone Number</label>
+                                            <span asp-validation-for="PhoneNumber" class="text-danger small ms-1"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-2">
+                                    <div class="col-md-6 mb-3" data-aos="fade-up" data-aos-delay="400">
+                                        <div class="form-floating">
+                                            <input asp-for="Password" type="password" class="form-control" id="floatingPass" placeholder="Password" required />
+                                            <label asp-for="Password" for="floatingPass">Password</label>
+                                            <span asp-validation-for="Password" class="text-danger small ms-1"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3" data-aos="fade-up" data-aos-delay="400">
+                                        <div class="form-floating">
+                                            <input asp-for="ConfirmPassword" type="password" class="form-control" id="floatingConfirm" placeholder="Confirm Password" required />
+                                            <label asp-for="ConfirmPassword" for="floatingConfirm">Confirm Password</label>
+                                            <span asp-validation-for="ConfirmPassword" class="text-danger small ms-1"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-check form-switch mb-4" data-aos="fade-up" data-aos-delay="500">
+                                    <input asp-for="IsOwner" class="form-check-input" type="checkbox" id="IsOwner" style="cursor: pointer;">
+                                    <label class="form-check-label fw-bold text-muted" for="IsOwner" style="cursor: pointer;">
+                                        Register as Owner/Admin
+                                    </label>
+                                </div>
+
+                                <div id="ownerFields" class="p-3 bg-light rounded-3 mb-4 border border-light">
+                                    <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">Owner Details</h6>
+
+                                    <div class="form-floating mb-3">
+                                        <input asp-for="CNIC" class="form-control" id="floatingCNIC" placeholder="CNIC Number" />
+                                        <label asp-for="CNIC" for="floatingCNIC">CNIC Number</label>
+                                        <span asp-validation-for="CNIC" class="text-danger small ms-1"></span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label asp-for="CNICDocument" class="form-label small text-muted fw-bold mb-1">Upload CNIC Document</label>
+                                        <input asp-for="CNICDocument" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" id="cnicFile" />
+                                        <span asp-validation-for="CNICDocument" class="text-danger small ms-1"></span>
+                                    </div>
+
+                                    <div class="row g-2">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-floating">
+                                                <input asp-for="BuildingName" class="form-control" id="floatingBuilding" placeholder="Building Name" />
+                                                <label asp-for="BuildingName" for="floatingBuilding">Building Name</label>
+                                                <span asp-validation-for="BuildingName" class="text-danger small ms-1"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-floating">
+                                                <input asp-for="BuildingAddress" class="form-control" id="floatingAddress" placeholder="Address" />
+                                                <label asp-for="BuildingAddress" for="floatingAddress">Building Address</label>
+                                                <span asp-validation-for="BuildingAddress" class="text-danger small ms-1"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div data-aos="fade-up" data-aos-delay="600">
+                                    <button type="submit" class="btn btn-theme w-100 rounded-3 shadow-sm">
+                                        Create Account
+                                    </button>
+                                </div>
+
+                            </form>
+
+                            <div class="text-center mt-4" data-aos="fade-in" data-aos-delay="700">
+                                <span class="text-muted small">Already have an account?</span>
+                                <a asp-action="Login" class="link-theme ms-1">Login here</a>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+            const ownerCheckbox = document.getElementById('IsOwner');
+            const ownerFields = document.getElementById('ownerFields');
+            const cnicInput = document.getElementById('floatingCNIC');
+            const cnicFile = document.getElementById('cnicFile');
+            const buildingNameInput = document.getElementById('floatingBuilding');
+            const buildingAddressInput = document.getElementById('floatingAddress');
+
+            function setRequired(el, required) {
+                if (!el) return;
+                if (required) el.setAttribute('required', 'required');
+                else el.removeAttribute('required');
+            }
+
+            function toggleOwnerFields() {
+                const required = ownerCheckbox.checked;
+                if (required) {
+                    ownerFields.style.display = 'block';
+                    ownerFields.classList.add('animate__animated', 'animate__fadeIn');
+                } else {
+                    ownerFields.style.display = 'none';
+                }
+
+
+                setRequired(cnicInput, required);
+                setRequired(cnicFile, required);
+                setRequired(buildingNameInput, required);
+                setRequired(buildingAddressInput, required);
+
+
+                if (window.jQuery && $.validator && $.validator.unobtrusive) {
+                    $.validator.unobtrusive.parse($(ownerFields));
+                }
+            }
+
+            toggleOwnerFields();
+
+         
+            ownerCheckbox.addEventListener('change', toggleOwnerFields);
+        });
+    </script>
+}

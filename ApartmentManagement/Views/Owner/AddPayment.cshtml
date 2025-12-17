@@ -1,0 +1,212 @@
+﻿@model ApartmentManagement.ViewModels.CreatePaymentViewModel
+
+@{
+    ViewData["Title"] = "Generate Bill";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700&family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --accent-color: #264653;
+        --heading-color: #111827;
+        --input-bg: #f9fafb;
+        --input-border: #e5e7eb;
+        --font-heading: 'Raleway', sans-serif;
+        --font-body: 'Roboto', sans-serif;
+    }
+
+    body {
+        background-color: #f3f4f6;
+        font-family: var(--font-body);
+        color: #374151;
+    }
+
+    .form-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 15px;
+    }
+
+    .pro-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0,0,0,0.02);
+        overflow: hidden;
+    }
+
+    .card-header-custom {
+        background: #fff;
+        padding: 30px 40px;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .input-group-seamless {
+        background-color: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        padding: 2px;
+    }
+
+        .input-group-seamless:focus-within {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(38, 70, 83, 0.1);
+            background-color: #fff;
+        }
+
+        .input-group-seamless .input-icon {
+            padding: 0 15px;
+            color: #9ca3af;
+            font-size: 1.1rem;
+        }
+
+        .input-group-seamless .form-control, .input-group-seamless .form-select {
+            border: none;
+            background: transparent;
+            padding: 12px 0;
+            box-shadow: none !important;
+        }
+
+    .form-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 6px;
+        margin-left: 2px;
+    }
+
+    .btn-save {
+        background-color: var(--accent-color);
+        color: white;
+        padding: 10px 24px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+    }
+
+        .btn-save:hover {
+            background-color: #1d3640;
+            color: white;
+        }
+</style>
+
+<div class="form-container">
+    <form asp-action="AddPayment" method="post" enctype="multipart/form-data">
+        <div class="pro-card">
+            <div class="card-header-custom">
+                <h2 class="fw-bold mb-1" style="font-family: var(--font-heading);">Generate New Bill</h2>
+                <p class="text-muted mb-0 small">Create a rent or utility invoice for a tenant.</p>
+            </div>
+
+            <div class="p-4 p-md-5">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label asp-for="ApartmentId" class="form-label">Apartment Unit</label>
+                        <div class="input-group-seamless">
+                            <i class="bi bi-house-door input-icon"></i>
+                            <select asp-for="ApartmentId" class="form-select" id="apartmentSelector" asp-items="ViewBag.Apartments">
+                                <option value="">-- Select Unit --</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="ApartmentId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Tenant Name</label>
+                        <div class="input-group-seamless bg-light">
+                            <i class="bi bi-person input-icon"></i>
+                            <input asp-for="TenantName" class="form-control" id="tenantNameDisplay" readonly placeholder="Auto-fills on selection..." />
+                            <input asp-for="TenantId" type="hidden" id="tenantIdField" />
+                        </div>
+                        <span asp-validation-for="TenantId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Month" class="form-label">Billing Month</label>
+                        <div class="input-group-seamless">
+                            <i class="bi bi-calendar-month input-icon"></i>
+                            <input asp-for="Month" type="month" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="BillDate" class="form-label">Issue Date</label>
+                        <div class="input-group-seamless">
+                            <i class="bi bi-calendar-event input-icon"></i>
+                            <input asp-for="BillDate" type="date" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="DueDate" class="form-label">Due Date</label> <div class="input-group-seamless">
+                            <i class="bi bi-calendar-x input-icon text-danger"></i>
+                            <input asp-for="DueDate" type="date" class="form-control" />
+                        </div>
+                        <span asp-validation-for="DueDate" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6 mt-3">
+                        <label class="form-label">Tenant Details</label>
+                        <div class="input-group-seamless bg-light">
+                            <i class="bi bi-person-check input-icon"></i>
+                            <input asp-for="TenantName" class="form-control fw-bold" id="tenantNameDisplay" readonly placeholder="Select apartment to see tenant..." />
+                            <input asp-for="TenantId" type="hidden" id="tenantIdField" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Type" class="form-label">Bill Type</label>
+                        <div class="input-group-seamless">
+                            <i class="bi bi-tag input-icon"></i>
+                            <select asp-for="Type" class="form-select" asp-items="Html.GetEnumSelectList<ApartmentManagement.Models.PaymentType>()"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Amount" class="form-label">Amount</label>
+                        <div class="input-group-seamless">
+                            <i class="bi bi-currency-dollar input-icon"></i>
+                            <input asp-for="Amount" type="number" step="0.01" class="form-control" placeholder="0.00" />
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="ChallanFile" class="form-label">Upload Challan Document</label>
+                        <input asp-for="ChallanFile" type="file" class="form-control" accept=".pdf,image/*" />
+                        <div class="form-text small">Upload the official bill/invoice for the tenant to see.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer bg-light p-4 text-end border-top-0">
+                <a asp-action="Payments" class="btn btn-light border me-2">Cancel</a>
+                <button type="submit" class="btn btn-save"><i class="bi bi-send me-1"></i> Generate Bill</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Simple AJAX to fetch tenant when apartment changes
+        document.getElementById('apartmentSelector').addEventListener('change', function() {
+            var aptId = this.value;
+            if(aptId) {
+                fetch(`/Owner/GetTenantByApartment?apartmentId=${aptId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.success) {
+                            document.getElementById('tenantNameDisplay').value = data.tenantName;
+                            document.getElementById('tenantIdField').value = data.tenantId;
+                        } else {
+                            document.getElementById('tenantNameDisplay').value = "No Active Tenant";
+                            document.getElementById('tenantIdField').value = "";
+                            alert("No active tenant found for this apartment.");
+                        }
+                    });
+            } else {
+                document.getElementById('tenantNameDisplay').value = "";
+                document.getElementById('tenantIdField').value = "";
+            }
+        });
+    </script>
+}

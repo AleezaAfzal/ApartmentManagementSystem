@@ -1,0 +1,300 @@
+@{
+    var pageType = ViewData["PageType"]?.ToString() ?? "Other";
+    bool isHomePage = (ViewContext.RouteData.Values["Controller"]?.ToString() == "Home")
+                   && (ViewContext.RouteData.Values["Action"]?.ToString() == "Index");
+    bool isAuthPage = ViewContext.RouteData.Values["Controller"]?.ToString() == "Account";
+    string? currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+    bool isUserAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>@ViewData["Title"] - Rentora</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+
+    <link href="~/assets/img/favicon.png" rel="icon">
+    <link href="~/assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+    <link href="~/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="~/assets/vendor/aos/aos.css" rel="stylesheet">
+    <link href="~/assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+    <link href="~/assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <link href="~/assets/vendor/drift-zoom/drift-basic.css" rel="stylesheet">
+
+    <link href="~/assets/css/main.css" rel="stylesheet">
+</head>
+
+<body class="index-page">
+    @if (!isAuthPage) 
+{
+    <header id="header" class="header d-flex align-items-center @(isHomePage ? "fixed-top" : "") ">
+        <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+             @if (isUserAuthenticated)
+            {
+                if ((User?.IsInRole("Owner") ?? false) || (User?.IsInRole("Tenant") ?? false))
+                {
+                    <a  class="logo d-flex align-items-center me-auto me-xl-0">
+                        <h1 class="sitename">Rentora</h1>
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Home" asp-action="Index" class="logo d-flex align-items-center me-auto me-xl-0">
+                        <h1 class="sitename">Rentora</h1>
+                    </a>
+                }
+
+            }
+            else
+            {
+                <a asp-controller="Home" asp-action="Index" class="logo d-flex align-items-center me-auto me-xl-0">
+                    <h1 class="sitename">Rentora</h1>
+             </a>
+            }
+
+            <nav id="navmenu" class="navmenu" >
+                <ul>
+        
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        if (User.IsInRole("Owner"))
+                        {
+                                <li><a asp-controller="Owner" asp-action="Dashboard">Overview</a></li>
+                                <li><a asp-controller="Owner" asp-action="AddApartment">Add Apartment</a></li>
+                                <li><a asp-controller="Owner" asp-action="VisitRequests">Visit Requests</a></li>
+                                
+                                
+                            <li class="dropdown">
+                                <a href="#"><span>Owner Panel</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+                                <ul>
+                             
+                                    
+                                        <li><a asp-controller="Owner" asp-action="Tenants">View Tenants</a></li>
+                                        <li><a asp-controller="Owner" asp-action="Apartments">View Apartments</a></li>
+                                        <li><a asp-controller="Owner" asp-action="Payments">Payments</a></li>
+                                        <li><a asp-controller="Owner" asp-action="Complaints">Complaints</a></li>
+                                        <li><a asp-controller="Owner" asp-action="VenueBookings">Venue Bookings</a></li>
+                                    
+                                </ul>
+                            </li>
+                        }
+                        else if (User.IsInRole("Tenant"))
+                        {
+                                <li><a asp-controller="Tenant" asp-action="Dashboard">Dashboard</a></li>
+                                <li><a asp-controller="Tenant" asp-action="Payments">Payments</a></li>
+                                <li><a asp-controller="Tenant" asp-action="VenueBookings">Bookings</a></li>
+                                <li><a asp-controller="Tenant" asp-action="Complaints">Complaints</a></li>
+                                <li><a asp-controller="Tenant" asp-action="Reviews">Reviews</a></li>
+                      
+
+                            <li class="dropdown">
+                                <a href="#"><span>Tenant Hub</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+                                <ul>
+                                        <li><a asp-controller="Tenant" asp-action="BookVenue">BookVenue</a></li>
+                                        <li><a asp-controller="Tenant" asp-action="SubmitComplaint"> SubmitComplaint</a></li>
+                                        <li><a asp-controller="Tenant" asp-action="SubmitReview">SubmitReview</a></li>
+                                       
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            
+                            <li><a asp-controller="Home" asp-action="Index" class="@(currentAction == "Index" ? "active" : "")">Home</a></li>
+                            <li><a asp-controller="User" asp-action="MyVisits">My Visits</a></li>
+                            <li><a asp-controller="User" asp-action="BrowseApartments">Properties</a></li>
+                                <li><a asp-controller="Home" asp-action="Reviews">Reviews</a></li>
+                            <li><a href="#featured-services">Services</a></li>
+                            <li><a href="#featured-agents">Agents</a></li>
+                        }
+                    }
+                    else
+                    {
+                        <li><a asp-controller="Home" asp-action="Index" class="@(currentAction == "Index" ? "active" : "")">Home</a></li>
+                            <li><a asp-controller="Home" asp-action="Reviews">Reviews</a></li>
+                        <li><a asp-controller="User" asp-action="BrowseApartments">Properties</a></li>
+
+                        <li><a href="#featured-services">Services</a></li>
+                        <li><a href="#featured-agents">Agents</a></li>
+                    }
+
+                    <li><a href="#footer">Contact</a></li>
+                </ul>
+                <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+
+            </nav>
+
+            <div class="d-flex gap-2">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline;">
+                        <button type="submit" class="btn-getstarted border-0" style="background-color: #dc3545;">Logout</button>
+                    </form>
+                }
+                else
+                {
+                    <a class="btn-getstarted" asp-controller="Account" asp-action="Login">Login</a>
+                    <a class="btn-getstarted" asp-controller="Account" asp-action="Register">Signup</a>
+                }
+            </div>
+
+        </div>
+    </header>
+}
+    <main class="main">
+        @if (TempData["Success"] != null)
+        {
+            <div class="container mt-5 pt-5">
+                <div class="alert alert-success alert-dismissible fade show mt-5" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="container mt-5 pt-5">
+                <div class="alert alert-danger alert-dismissible fade show mt-5" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        }
+
+        @RenderBody()
+    </main>
+    @if (!isAuthPage)
+    {
+        <footer id="footer" class="footer position-relative">
+
+            <div class="container">
+                <div class="row gy-5">
+
+                    <div class="col-lg-4">
+                        <div class="footer-content">
+                            <a href="index.html" class="logo d-flex align-items-center mb-4">
+                                <span class="sitename">Rentora</span>
+                            </a>
+                            <p class="mb-4">Manage your properties effortlessly with Rentora. From tenants to maintenance, we handle it all so you can enjoy stress-free rental income. Join the smart way to rent and manage today.</p>
+
+                            <div class="social-links d-flex mt-4">
+                                <a href="#"><i class="bi bi-twitter-x"></i></a>
+                                <a href="#"><i class="bi bi-facebook"></i></a>
+                                <a href="#"><i class="bi bi-instagram"></i></a>
+                                <a href="#"><i class="bi bi-linkedin"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2 col-6">
+                        <div class="footer-links">
+                            <h4>Company</h4>
+                            <ul>
+                                <li><a href="#"><i class="bi bi-chevron-right"></i> About</a></li>
+                                <li><a href="#"><i class="bi bi-chevron-right"></i> Careers</a></li>
+                                <li><a href="#"><i class="bi bi-chevron-right"></i> Press</a></li>
+                                <li><a href="#"><i class="bi bi-chevron-right"></i> Blog</a></li>
+                                <li><a href="#"><i class="bi bi-chevron-right"></i> Contact</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2 col-6">
+                        <div class="footer-links">
+                            <h4>Solutions</h4>
+                            <ul>
+                                <li><a href="#"><i class="bi bi-chevron-right"></i> Digital Strategy</a></li>
+                                <li><a href="#"><i class="bi bi-chevron-right"></i> Cloud Computing</a></li>
+                                <li><a href="#"><i class="bi bi-chevron-right"></i> Data Analytics</a></li>
+                                <li><a href="#"><i class="bi bi-chevron-right"></i> AI Solutions</a></li>
+                                <li><a href="#"><i class="bi bi-chevron-right"></i> Cybersecurity</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="footer-contact">
+                            <h4>Get in Touch</h4>
+                            <div class="contact-item">
+                                <div class="contact-icon">
+                                    <i class="bi bi-geo-alt"></i>
+                                </div>
+                                <div class="contact-info">
+                                    <p>Lahore, Pakistan</p>
+                                </div>
+                            </div>
+
+                            <div class="contact-item">
+                                <div class="contact-icon">
+                                    <i class="bi bi-telephone"></i>
+                                </div>
+                                <div class="contact-info">
+                                    <p>+92 322-4890915</p>
+                                </div>
+                            </div>
+
+                            <div class="contact-item">
+                                <div class="contact-icon">
+                                    <i class="bi bi-envelope"></i>
+                                </div>
+                                <div class="contact-info">
+                                    <p>contact@rentora.com</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6">
+                            <div class="copyright">
+                                <p>© <span>Copyright</span> <strong class="px-1 sitename">Rentora</strong> <span>All Rights Reserved</span></p>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="footer-bottom-links">
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                <a href="#">Cookie Policy</a>
+                            </div>
+                          
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </footer>
+
+    }
+    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+    <div id="preloader"></div>
+
+    <script src="~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/assets/vendor/php-email-form/validate.js"></script>
+    <script src="~/assets/vendor/aos/aos.js"></script>
+    <script src="~/assets/vendor/purecounter/purecounter_vanilla.js"></script>
+    <script src="~/assets/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="~/assets/vendor/swiper/swiper-bundle.min.js"></script>
+    <script src="~/assets/vendor/drift-zoom/Drift.min.js"></script>
+
+    <script src="~/assets/js/main.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

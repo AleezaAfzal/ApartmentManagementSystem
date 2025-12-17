@@ -1,0 +1,144 @@
+@model IEnumerable<ApartmentManagement.Models.Review>
+
+@{
+    ViewData["Title"] = "My Reviews";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-primary"><i class="bi bi-journal-text"></i> My Reviews</h2>
+            <p class="text-muted mb-0">Manage feedback for your rented apartments.</p>
+        </div>
+        <div>
+            <a asp-action="Dashboard" class="btn btn-outline-secondary me-2">Back to Dashboard</a>
+            <a asp-action="SubmitReview" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Write Review
+            </a>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 bg-light rounded border border-dashed">
+            <i class="bi bi-star text-muted" style="font-size: 3rem;"></i>
+            <h5 class="mt-3 text-muted">You haven't written any reviews yet.</h5>
+            <a asp-action="SubmitReview" class="btn btn-sm btn-outline-primary mt-2">Write your first review</a>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-secondary text-uppercase small fw-bold">
+                        <tr>
+                            <th class="ps-4">Apartment</th>
+                            <th>Rating</th>
+                            <th>Review Title</th>
+                            <th>Date</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var review in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="fw-bold">Unit @review.Apartment?.ApartmentNumber</span>
+                                    <div class="small text-muted">@review.Apartment?.Building?.Name</div>
+                                </td>
+                                <td>
+                                    <div class="text-warning">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= review.Rating)
+                                            {
+                                                <i class="bi bi-star-fill"></i>
+                                            }
+                                            else
+                                            {
+
+                                                <i class="bi bi-star text-muted opacity-25"></i>
+                                            }
+                                        }
+                                        <span class="text-dark small ms-1 fw-bold">(@review.Rating/5)</span>
+                                    </div>
+                                </td>
+                                <td>@review.Title</td>
+                                <td>@review.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="SubmitReview" asp-route-id="@review.Id" class="btn btn-sm btn-outline-warning text-dark" title="Edit">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#reviewModal_@review.Id" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteReviewModal_@review.Id" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <div class="modal fade" id="reviewModal_@review.Id" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-light">
+                                            <h5 class="modal-title fw-bold">Review Details</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="text-center mb-3">
+                                                <h1 class="text-warning mb-0">@review.Rating<span class="fs-6 text-muted">/5</span></h1>
+                                                <div class="text-warning">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        if (i <= review.Rating)
+                                                        {
+                                                            <i class="bi bi-star-fill"></i>
+                                                        }
+                                                        else
+                                                        {
+
+                                                            <i class="bi bi-star text-muted opacity-25"></i>
+                                                        }
+                                                    }
+                                                </div>
+                                            </div>
+                                            <h5 class="fw-bold">@review.Title</h5>
+                                            <p class="text-muted bg-light p-3 rounded">"@review.Comment"</p>
+                                            <hr />
+                                            <small class="text-muted">Submitted on @review.CreatedAt.ToString("MM/dd/yyyy") for Unit @review.Apartment?.ApartmentNumber</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal fade" id="deleteReviewModal_@review.Id" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-danger text-white">
+                                            <h5 class="modal-title">Delete Review?</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete your review <strong>"@review.Title"</strong>?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form asp-action="DeleteReview" asp-route-id="@review.Id" method="post">
+                                                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

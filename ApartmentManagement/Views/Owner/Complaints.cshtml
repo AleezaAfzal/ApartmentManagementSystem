@@ -1,0 +1,255 @@
+@using ApartmentManagement.Models
+@model IEnumerable<ApartmentManagement.Models.Complaint>
+
+@{
+    ViewData["Title"] = "Complaints Management";
+}
+
+<section class="section">
+    <div class="container" data-aos="fade-up">
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+            <div>
+                <h2 class="fw-bold text-dark">Complaints Management</h2>
+                <p class="text-muted mb-0">Track and resolve tenant issues.</p>
+            </div>
+            <a asp-action="Dashboard" class="btn btn-outline-secondary fw-bold">
+                <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="table-responsive">
+                <table class="table mb-0 align-middle table-hover">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Tenant Info</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Apartment</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Complaint</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Date</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Status</th>
+                            <th class="py-3 px-4 text-end text-uppercase text-secondary small fw-bold">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white">
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var complaint in Model)
+                            {
+                                // --- Status Badge Logic ---
+                                string statusBadge = complaint.Status switch
+                                {
+                                    ComplaintStatus.Pending => "bg-warning text-dark bg-opacity-25",
+                                    ComplaintStatus.InProgress => "bg-info text-info bg-opacity-10",
+                                    ComplaintStatus.Resolved => "bg-success text-success bg-opacity-10",
+                                    _ => "bg-secondary"
+                                };
+
+                                string statusIcon = complaint.Status switch
+                                {
+                                    ComplaintStatus.Pending => "bi-hourglass-split",
+                                    ComplaintStatus.InProgress => "bi-gear-wide-connected",
+                                    ComplaintStatus.Resolved => "bi-check-circle-fill",
+                                    _ => "bi-circle"
+                                };
+
+                                bool isResolved = complaint.Status == ComplaintStatus.Resolved;
+
+                                <tr class="border-bottom">
+                                    <td class="px-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center me-2 bg-light text-primary fw-bold"
+                                                 style="width: 35px; height: 35px;">
+                                                @(complaint.Tenant?.User?.FullName?.Substring(0, 1) ?? "T")
+                                            </div>
+                                            <div class="fw-bold text-dark">@complaint.Tenant?.User?.FullName</div>
+                                        </div>
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <div class="fw-bold text-dark">Unit @complaint.Tenant?.Apartment?.ApartmentNumber</div>
+                                        <div class="small text-muted">@complaint.Tenant?.Apartment?.Building?.Name</div>
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <span class="fw-bold text-dark">@complaint.Title</span>
+                                    </td>
+
+                                    <td class="px-4 py-3 text-muted small">
+                                        <i class="bi bi-calendar3 me-1"></i>
+                                        @complaint.ComplaintDate.ToString("MMM dd, yyyy")
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <span class="badge rounded-pill @statusBadge px-3 py-2">
+                                            <i class="bi @statusIcon me-1"></i> @complaint.Status
+                                        </span>
+                                    </td>
+
+                                    <td class="px-4 py-3 text-end">
+                                        @if (isResolved)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-secondary bg-opacity-75"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#complaintModal_@complaint.Id">
+                                                <i class="bi bi-lock-fill me-1"></i> Closed (View)
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-primary fw-bold"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#complaintModal_@complaint.Id">
+                                                <i class="bi bi-pencil-square me-1"></i> View / Update
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+
+                                <div class="modal fade" id="complaintModal_@complaint.Id" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                                        <div class="modal-content">
+
+                                            <div class="modal-header bg-light">
+                                                <h5 class="modal-title fw-bold">
+                                                    @if (isResolved)
+                                                    {
+                                                        <i class="bi bi-check-circle-fill me-2 text-success"></i>
+                                            
+                                                        <span class="text-success">Complaint Closed</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="bi bi-exclamation-circle me-2 text-danger"></i>
+                                            
+                                                        <span>Update Complaint</span>
+                                                    }
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+
+                                            <div class="modal-body p-4">
+                                                <div class="row g-4">
+
+                                                    <div class="col-lg-6 border-end">
+
+                                                        <div class="mb-4 p-3 bg-light rounded border">
+                                                            <div class="d-flex align-items-center mb-2">
+                                                                <div class="rounded-circle bg-white border d-flex align-items-center justify-content-center me-2 text-primary fw-bold"
+                                                                     style="width: 40px; height: 40px; font-size: 1.2rem;">
+                                                                    @(complaint.Tenant?.User?.FullName?.Substring(0, 1) ?? "T")
+                                                                </div>
+                                                                <div>
+                                                                    <h6 class="fw-bold text-dark mb-0">@complaint.Tenant?.User?.FullName</h6>
+                                                                    <small class="text-muted d-block" style="line-height: 1.2;">
+                                                                        Unit @complaint.Tenant?.Apartment?.ApartmentNumber • @complaint.Tenant?.Apartment?.Building?.Name
+                                                                    </small>
+                                                                </div>
+                                                            </div>
+                                                            <div class="d-flex align-items-center text-muted small mt-2 border-top pt-2">
+                                                                <i class="bi bi-envelope me-2"></i> @complaint.Tenant?.User?.Email
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label class="small text-uppercase text-muted fw-bold">Issue Title</label>
+                                                            <h5 class="fw-bold text-dark">@complaint.Title</h5>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label class="small text-uppercase text-muted fw-bold">Description</label>
+                                                            <div class="p-3 bg-white border rounded text-dark mt-1">
+                                                                @complaint.Description
+                                                            </div>
+                                                        </div>
+
+                                                        @if (!string.IsNullOrEmpty(complaint.ImagePath))
+                                                        {
+                                                            <div class="mb-3">
+                                                                <label class="small text-uppercase text-muted fw-bold mb-2">Attached Image</label>
+                                                                <div class="border rounded p-1">
+                                                                    <a href="@complaint.ImagePath" target="_blank">
+                                                                        <img src="@complaint.ImagePath" class="img-fluid rounded" alt="Evidence" style="max-height: 200px; width: 100%; object-fit: cover;" />
+                                                                    </a>
+                                                                    <div class="text-center mt-1">
+                                                                        <small class="text-muted"><i class="bi bi-zoom-in me-1"></i>Click to expand</small>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </div>
+
+                                                    <div class="col-lg-6">
+                                                        <h6 class="fw-bold text-primary mb-3">
+                                                            @(isResolved ? "Resolution Details" : "Update Status")
+                                                        </h6>
+
+                                                        <form asp-action="UpdateComplaintStatus" method="post">
+                                                            <input type="hidden" name="id" value="@complaint.Id" />
+
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-bold small text-muted">Current Status</label>
+                                                                <select name="status" class="form-select" disabled="@(isResolved ? "disabled" : null)"
+                                                                        asp-items="Html.GetEnumSelectList<ApartmentManagement.Models.ComplaintStatus>()">
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-bold small text-muted">Admin Response / Note</label>
+                                                                <textarea name="adminResponse" class="form-control" rows="5" disabled="@(isResolved ? "disabled" : null)"
+                                                                  placeholder="Write a response to the tenant...">@complaint.AdminResponse</textarea>
+                                                            </div>
+
+                                                            @if (!isResolved)
+                                                            {
+                                                                <div class="d-grid">
+                                                                    <button type="submit" class="btn btn-primary fw-bold">
+                                                                        <i class="bi bi-save me-2"></i>Save Updates
+                                                                    </button>
+                                                                </div>
+                                                            }
+                                                        </form>
+
+                                                        @if (complaint.ResolvedAt.HasValue)
+                                                        {
+                                                            <div class="mt-4 text-center">
+                                                                <small class="text-success fw-bold">
+                                                                    <i class="bi bi-check-all me-1"></i> Resolved on @complaint.ResolvedAt.Value.ToString("g")
+                                                                </small>
+                                                            </div>
+                                                        }
+
+                                                        @if (isResolved)
+                                                        {
+                                                            <div class="alert alert-secondary mt-3 text-center small">
+                                                                <i class="bi bi-lock-fill"></i> This ticket is closed.
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="modal-footer border-0 bg-light">
+                                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="text-muted mb-3"><i class="bi bi-emoji-smile" style="font-size: 3rem;"></i></div>
+                                    <h5 class="text-muted">No complaints found</h5>
+                                    <p class="small text-muted">Everything seems to be running smoothly.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

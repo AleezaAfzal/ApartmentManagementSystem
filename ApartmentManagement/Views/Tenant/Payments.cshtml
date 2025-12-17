@@ -1,0 +1,255 @@
+@model IEnumerable<ApartmentManagement.Models.Payment>
+
+@{
+    ViewData["Title"] = "My Payments";
+}
+
+<style>
+    /* Professional Styling Variables */
+    :root {
+        --accent-color: #264653;
+        --input-bg: #f9fafb;
+        --input-border: #e5e7eb;
+    }
+
+    /* Seamless Inputs for Modal */
+    .input-group-seamless {
+        background-color: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        padding: 2px;
+    }
+
+        .input-group-seamless:focus-within {
+            border-color: var(--accent-color);
+            background-color: #fff;
+        }
+
+        .input-group-seamless .input-icon {
+            padding: 0 12px;
+            color: #9ca3af;
+        }
+
+        .input-group-seamless .form-control, .input-group-seamless .form-select {
+            border: none;
+            background: transparent;
+            box-shadow: none !important;
+        }
+
+    /* Table Styling */
+    .table-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        overflow: hidden;
+    }
+
+    .table thead th {
+        background-color: #f8fafc;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border-bottom: 2px solid #e2e8f0;
+        padding: 15px;
+        vertical-align: middle;
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+        padding: 15px;
+        color: #334155;
+        font-size: 0.95rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+</style>
+
+<div class="container mt-5">
+    <h2 class="fw-bold mb-4" style="color: #264653;">My Bills & Payments</h2>
+
+    <div class="card mb-4 border-0 shadow-sm p-3 bg-light">
+        <form asp-action="Payments" method="get" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="small fw-bold text-muted">Month</label>
+                <input type="month" name="searchMonth" value="@ViewData["CurrentMonth"]" class="form-control form-control-sm" />
+            </div>
+            <div class="col-md-3">
+                <label class="small fw-bold text-muted">Type</label>
+                <select name="searchType" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<ApartmentManagement.Models.PaymentType>()">
+                    <option value="">All Types</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="small fw-bold text-muted">Status</label>
+                <select name="searchStatus" class="form-select form-select-sm">
+                    <option value="">All Status</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Unpaid">Unpaid</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-sm btn-dark w-100"><i class="bi bi-search"></i> Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-card">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Dates</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th class="text-center">Challan</th>
+                    <th class="text-center">My Proof</th>
+                    <th>Status</th>
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">@item.Month.ToString("MMM yyyy")</td>
+
+                        <td>
+                            <div class="small text-muted">Issued: @item.BillDate.ToString("dd MMM")</div>
+                            <div class="small fw-bold text-danger">Due: @item.DueDate.ToString("dd MMM")</div>
+                        </td>
+
+                        <td>
+                            <span class="badge bg-light text-secondary border">@item.Type</span>
+                        </td>
+
+                        <td>
+                            <div class="fw-bold text-dark">$@item.Amount.ToString("N0")</div>
+                        </td>
+
+                        <td class="text-center">
+                            @if (!string.IsNullOrEmpty(item.ChallanDocumentPath))
+                            {
+                                <a href="@item.ChallanDocumentPath" target="_blank" class="btn btn-sm btn-outline-dark border-0">
+                                    <i class="bi bi-file-earmark-arrow-down fs-5"></i>
+                                    <div style="font-size: 10px;">Download</div>
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">-</span>
+                            }
+                        </td>
+
+                        <td class="text-center">
+                            @if (!string.IsNullOrEmpty(item.PaymentReceiptPath))
+                            {
+                                <a href="@item.PaymentReceiptPath" target="_blank" class="btn btn-sm btn-link text-decoration-none">
+                                    <i class="bi bi-image fs-5 text-primary"></i>
+                                    <div style="font-size: 10px;">View</div>
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted small" style="font-size: 11px;">Not Uploaded</span>
+                            }
+                        </td>
+
+                        <td>
+                            @if (item.Status == ApartmentManagement.Models.PaymentStatus.Paid)
+                            {
+                                <span class="badge rounded-pill bg-success bg-opacity-10 text-success">Verified</span>
+                            }
+                            else if (item.Status == ApartmentManagement.Models.PaymentStatus.Pending)
+                            {
+                                <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning">Pending</span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger">Unpaid</span>
+                            }
+                        </td>
+
+                        <td class="text-end">
+                            @if (item.Status == ApartmentManagement.Models.PaymentStatus.Unpaid)
+                            {
+                                <button type="button" class="btn btn-sm btn-primary px-3 fw-bold"
+                                        style="background-color: var(--accent-color); border:none;"
+                                        data-bs-toggle="modal" data-bs-target="#payModal-@item.Id">
+                                    Pay Now
+                                </button>
+                            }
+                            else
+                            {
+                                <button disabled class="btn btn-sm btn-light text-muted border px-3">
+                                    Paid
+                                </button>
+                            }
+                        </td>
+                    </tr>
+
+                    @if (item.Status == ApartmentManagement.Models.PaymentStatus.Unpaid)
+                    {
+                        <div class="modal fade" id="payModal-@item.Id" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow-lg rounded-4">
+                                    <div class="modal-header border-0 pb-0">
+                                        <h5 class="modal-title fw-bold">Submit Payment</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body p-4">
+                                        <div class="alert alert-light border text-center mb-4">
+                                            <small class="text-muted d-block">Amount Due</small>
+                                            <span class="fs-3 fw-bold text-dark">$@item.Amount.ToString("N0")</span>
+                                            <div class="small text-danger">Due: @item.DueDate.ToString("dd MMM yyyy")</div>
+                                        </div>
+
+                                        <form asp-action="SubmitPayment" method="post" enctype="multipart/form-data">
+                                            <input type="hidden" name="paymentId" value="@item.Id" />
+
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-bold text-muted">Payment Method</label>
+                                                <div class="input-group-seamless">
+                                                    <i class="bi bi-credit-card input-icon"></i>
+                                                    <select name="paymentMethod" class="form-select" required>
+                                                        <option value="">Select Method...</option>
+                                                        <option value="Bank Transfer">Bank Transfer</option>
+                                                        <option value="Online App">EasyPaisa / JazzCash</option>
+                                                        <option value="Check">Check / Pay Order</option>
+                                                        <option value="Cash">Cash Handover</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-bold text-muted">Transaction ID / Ref #</label>
+                                                <div class="input-group-seamless">
+                                                    <i class="bi bi-123 input-icon"></i>
+                                                    <input type="text" name="transactionId" class="form-control" placeholder="e.g. TXN-998877" required />
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-4">
+                                                <label class="form-label small fw-bold text-muted">Upload Receipt Proof</label>
+                                                <div class="input-group-seamless">
+                                                    <i class="bi bi-image input-icon"></i>
+                                                    <input type="file" name="paymentReceipt" class="form-control" accept="image/*,.pdf" required />
+                                                </div>
+                                                <div class="form-text small">Upload screenshot or photo of receipt.</div>
+                                            </div>
+
+                                            <button type="submit" class="btn w-100 fw-bold text-white py-2" style="background-color: var(--accent-color);">
+                                                Confirm Payment
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

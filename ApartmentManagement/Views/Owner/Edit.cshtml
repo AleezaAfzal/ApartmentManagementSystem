@@ -1,0 +1,123 @@
+﻿@using ApartmentManagement.Models
+@model ApartmentManagement.Models.Tenant
+
+@{
+    ViewData["Title"] = "Edit Tenant Profile";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1" style="color: var(--brand-900); font-weight: 800;">Edit Profile</h2>
+                    <p style="color: #64748b;">Update contact information. Lease details are read-only.</p>
+                </div>
+                <a asp-action="Tenants" class="btn btn-light text-muted fw-bold"><i class="fas fa-times me-2"></i>Cancel</a>
+            </div>
+
+            <div class="card shadow-sm border-0" style="border-radius: 0.75rem;">
+                <div class="card-body p-5">
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="UserId" />
+                        <input type="hidden" asp-for="ApartmentId" />
+                        <input type="hidden" asp-for="RentPlanMonths" />
+
+                        <h6 class="text-uppercase fw-bold text-primary small border-bottom pb-2 mb-3">
+                            <i class="fas fa-user-edit me-2"></i>Personal Information
+                        </h6>
+
+                        <div class="row g-3 mb-5">
+                            <div class="col-md-6">
+                                <label asp-for="User.FullName" class="form-label fw-bold small text-muted">Full Name</label>
+                                <input asp-for="User.FullName" class="form-control" />
+                                <span asp-validation-for="User.FullName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="CNIC" class="form-label fw-bold small text-muted">CNIC / ID Number</label>
+                                <input asp-for="CNIC" class="form-control" />
+                                <span asp-validation-for="CNIC" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="User.Email" class="form-label fw-bold small text-muted">Email Address</label>
+                                <input asp-for="User.Email" class="form-control" />
+                                <span asp-validation-for="User.Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="User.PhoneNumber" class="form-label fw-bold small text-muted">Phone Number</label>
+                                <input asp-for="User.PhoneNumber" class="form-control" />
+                                <span asp-validation-for="User.PhoneNumber" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label asp-for="PermanentAddress" class="form-label fw-bold small text-muted">Permanent Address</label>
+                                <textarea asp-for="PermanentAddress" class="form-control" rows="2"></textarea>
+                                <span asp-validation-for="PermanentAddress" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label asp-for="Notes" class="form-label fw-bold small text-muted">Administrative Notes</label>
+                                <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+                                <span asp-validation-for="Notes" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <h6 class="text-uppercase fw-bold text-muted small border-bottom pb-2 mb-3">
+                            <i class="fas fa-lock me-2"></i>Lease Details (Locked)
+                        </h6>
+
+                        <div class="row g-3 p-3 rounded" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small text-muted">Assigned Unit</label>
+                                <input type="text" class="form-control bg-light" value="Unit @Model.Apartment?.ApartmentNumber (@Model.Apartment?.Building?.Name)" readonly />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="MonthlyRent" class="form-label fw-bold small text-muted">Monthly Rent</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted">$</span>
+                                    <input asp-for="MonthlyRent" class="form-control bg-light" readonly />
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="SecurityDeposit" class="form-label fw-bold small text-muted">Security Deposit</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted">$</span>
+                                    <input asp-for="SecurityDeposit" class="form-control bg-light" readonly />
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="ContractStartDate" class="form-label fw-bold small text-muted">Start Date</label>
+                                <input asp-for="ContractStartDate" class="form-control bg-light" type="date" readonly />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="ContractEndDate" class="form-label fw-bold small text-muted">End Date</label>
+                                <input asp-for="ContractEndDate" class="form-control bg-light" type="date" readonly />
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-5">
+                            <a asp-action="Tenants" class="btn btn-light text-muted fw-bold px-4">Cancel</a>
+                            <button type="submit" class="btn btn-primary fw-bold px-5" style="background-color: var(--brand-600); border: none;">Save Updates</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

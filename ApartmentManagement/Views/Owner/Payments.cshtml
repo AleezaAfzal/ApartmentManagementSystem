@@ -1,0 +1,141 @@
+@model IEnumerable<ApartmentManagement.Models.Payment>
+
+@{
+    ViewData["Title"] = "Payments Management";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold" style="color: #264653;">Payment Records</h2>
+        <a asp-action="AddPayment" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> New Bill</a>
+    </div>
+
+    <div class="card mb-4 border-0 shadow-sm p-3 bg-light">
+        <form asp-action="Payments" method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="small fw-bold text-muted">Apartment</label>
+                <select name="searchApartmentId" class="form-select form-select-sm" asp-items="ViewBag.SearchApartmentList">
+                    <option value="">All Apartments</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="small fw-bold text-muted">Month</label>
+                <input type="month" name="searchMonth" value="@ViewData["CurrentMonth"]" class="form-control form-control-sm" />
+            </div>
+            <div class="col-md-2">
+                <label class="small fw-bold text-muted">Type</label>
+                <select name="searchType" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<ApartmentManagement.Models.PaymentType>()">
+                    <option value="">All Types</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="small fw-bold text-muted">Status</label>
+                <select name="searchStatus" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<ApartmentManagement.Models.PaymentStatus>()">
+                    <option value="">All Status</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-sm btn-dark w-100"><i class="bi bi-search"></i> Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-card" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04);">
+        <table class="table mb-0 table-hover align-middle">
+            <thead style="background-color: #f8fafc;">
+                <tr>
+                    <th>Tenant Name</th>
+                    <th>Unit</th>
+                    <th>Billing</th>
+                    <th>Dates</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th class="text-center">Proof</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-bold text-dark">@(item.Tenant?.User?.FullName ?? "Unknown")</td>
+
+                        <td>
+                            <span class="badge bg-light text-secondary border">
+                                @(item.Tenant?.Apartment?.ApartmentNumber ?? "N/A")
+                            </span>
+                        </td>
+
+                        <td>@item.Month.ToString("MMM yyyy")</td>
+
+                        <td>
+                            <div class="small text-muted">Issued: @item.BillDate.ToString("dd/MM")</div>
+                            <div class="small fw-bold text-danger">Due: @item.DueDate.ToString("dd/MM")</div>
+                        </td>
+
+                        <td>@item.Type</td>
+
+                        <td class="fw-bold">$@item.Amount.ToString("N0")</td>
+
+                        <td class="text-center">
+                            @if (!string.IsNullOrEmpty(item.PaymentReceiptPath))
+                            {
+                                <a href="@item.PaymentReceiptPath" target="_blank" class="btn btn-sm btn-outline-primary border-0" title="View Receipt">
+                                    <i class="bi bi-eye-fill"></i> View
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">-</span>
+                            }
+                        </td>
+
+                        <td>
+                            @if (item.Status == ApartmentManagement.Models.PaymentStatus.Paid)
+                            {
+                                <span class="badge bg-success">Verified</span>
+                            }
+                            else if (item.Status == ApartmentManagement.Models.PaymentStatus.Pending)
+                            {
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Unpaid</span>
+                            }
+                        </td>
+
+                        <td class="text-end">
+                            @if (item.Status == ApartmentManagement.Models.PaymentStatus.Paid)
+                            {
+                                <button disabled class="btn btn-sm btn-light text-muted border py-0">
+                                    <i class="bi bi-lock-fill"></i> Locked
+                                </button>
+                            }
+                            else
+                            {
+                                <form asp-action="VerifyPayment" method="post" style="display:inline;">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-sm btn-success py-0" title="Mark as Verified">
+                                        <i class="bi bi-check-circle"></i> Verify
+                                    </button>
+                                </form>
+
+                                @if (item.Status == ApartmentManagement.Models.PaymentStatus.Pending)
+                                {
+                                    <form asp-action="UnverifyPayment" method="post" style="display:inline;" onsubmit="return confirm('Reject this payment proof? Status will become Unpaid.');">
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger py-0 ms-1" title="Reject/Unverify">
+                                            <i class="bi bi-x-circle"></i> Unverify
+                                        </button>
+                                    </form>
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

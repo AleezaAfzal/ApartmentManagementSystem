@@ -1,0 +1,49 @@
+@model ApartmentManagement.Models.Building
+
+@{
+    ViewData["Title"] = "Add Building";
+}
+
+<h1>Add Building</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="AddBuilding" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="FullAddress" class="control-label"></label>
+                <input asp-for="FullAddress" class="form-control" />
+                <span asp-validation-for="FullAddress" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="City" class="control-label"></label>
+                <input asp-for="City" class="form-control" />
+                <span asp-validation-for="City" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="NumberOfFloors" class="control-label"></label>
+                <input asp-for="NumberOfFloors" class="form-control" type="number" min="1" />
+                <span asp-validation-for="NumberOfFloors" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <input type="submit" value="Add Building" class="btn btn-primary" />
+                <a asp-action="Dashboard" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

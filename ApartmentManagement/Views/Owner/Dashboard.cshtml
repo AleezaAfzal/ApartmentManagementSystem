@@ -1,0 +1,218 @@
+@{
+    ViewData["Title"] = "Owner Dashboard";
+
+    // Casting viewbag data to lists for easier handling
+    var visits = ViewBag.PendingVisits as List<ApartmentManagement.Models.VisitRequest>;
+    var complaints = ViewBag.PendingComplaints as List<ApartmentManagement.Models.Complaint>;
+    var bookings = ViewBag.PendingVenueBookings as List<ApartmentManagement.Models.VenueBooking>;
+}
+
+<div class="container-fluid py-4 bg-light min-vh-100">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold text-dark mb-0">Dashboard</h1>
+            <p class="text-muted small mb-0">Welcome back, Administrator.</p>
+        </div>
+        <div>
+            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill border border-primary border-opacity-25">
+                <i class="bi bi-shield-lock-fill me-1"></i> Admin Access
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 border-start border-4 border-primary">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-calendar-check text-primary fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0 text-muted small text-uppercase fw-bold">Visit Requests</h6>
+                            <h3 class="mb-0 fw-bold">@(visits?.Count ?? 0)</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 border-start border-4 border-danger">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-danger bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-exclamation-triangle text-danger fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0 text-muted small text-uppercase fw-bold">Pending Complaints</h6>
+                            <h3 class="mb-0 fw-bold">@(complaints?.Count ?? 0)</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 border-start border-4 border-success">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-success bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-building-check text-success fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0 text-muted small text-uppercase fw-bold">Venue Bookings</h6>
+                            <h3 class="mb-0 fw-bold">@(bookings?.Count ?? 0)</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title fw-bold mb-0 text-primary"><i class="bi bi-key me-2"></i>Visit Requests</h5>
+                    <a asp-action="VisitRequests" class="btn btn-sm btn-light rounded-pill">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    @if (visits != null && visits.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var item in visits.Take(5))
+                            {
+                                <div class="list-group-item border-0 border-bottom p-3 hover-bg">
+                                    <div class="d-flex align-items-center">
+                                        <div class="text-center border rounded p-2 me-3 bg-light" style="min-width: 60px;">
+                                            <small class="d-block text-danger fw-bold text-uppercase" style="font-size: 0.7rem;">@item.RequestedDate.ToString("MMM")</small>
+                                            <span class="d-block fw-bold fs-4 line-height-1">@item.RequestedDate.Day</span>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-0 fw-bold text-dark">Unit @item.Apartment?.ApartmentNumber</h6>
+                                            <small class="text-muted d-block"><i class="bi bi-person me-1"></i> @item.User?.FullName</small>
+                                            <small class="text-primary"><i class="bi bi-clock me-1"></i> @item.RequestedTime</small>
+                                        </div>
+                                        <a asp-action="VisitRequests" class="btn btn-sm btn-outline-primary"><i class="bi bi-arrow-right"></i></a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-x fs-1 opacity-25"></i>
+                            <p class="mt-2 small">No pending visit requests.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title fw-bold mb-0 text-danger"><i class="bi bi-exclamation-circle me-2"></i>Complaints</h5>
+                    <a asp-action="Complaints" class="btn btn-sm btn-light rounded-pill">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    @if (complaints != null && complaints.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var item in complaints.Take(5))
+                            {
+                                <div class="list-group-item border-0 border-bottom p-3 hover-bg">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="badge bg-warning text-dark">@item.Status</span>
+                                        <small class="text-muted">@item.ComplaintDate.ToString("MMM dd")</small>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-1">@item.Title</h6>
+                                    <small class="text-muted d-block mb-2 text-truncate">@item.Description</small>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted"><i class="bi bi-house me-1"></i> Unit @item.Tenant?.Apartment?.ApartmentNumber</small>
+                                        <a asp-action="Complaints" class="btn btn-sm btn-danger py-0 px-2" style="font-size: 0.75rem;">Resolve</a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-emoji-smile fs-1 opacity-25"></i>
+                            <p class="mt-2 small">No pending complaints. Great job!</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title fw-bold mb-0 text-success"><i class="bi bi-calendar-event me-2"></i>Bookings</h5>
+                    <a asp-action="VenueBookings" class="btn btn-sm btn-light rounded-pill">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    @if (bookings != null && bookings.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var item in bookings.Take(5))
+                            {
+                                <div class="list-group-item border-0 border-bottom p-3 hover-bg">
+                                    <div class="d-flex align-items-start">
+                                        <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3 text-success">
+                                            @if (item.VenueType.ToString().Contains("Hall"))
+                                            {
+                                                <i class="bi bi-building"></i>
+                                            }
+                                            else if (item.VenueType.ToString().Contains("Pool"))
+                                            {
+
+                                                <i class="bi bi-water"></i>
+                                            }
+                                            else
+                                            {
+
+                                                <i class="bi bi-tree"></i>
+                                            }
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="fw-bold mb-0">@item.VenueType</h6>
+                                            <small class="text-dark fw-bold">@item.BookingDate.ToString("D")</small>
+                                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                                <small class="text-muted">@item.BookingTime</small>
+                                                <a asp-action="VenueBookings" class="text-success small fw-bold text-decoration-none">Review</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar2-minus fs-1 opacity-25"></i>
+                            <p class="mt-2 small">No new booking requests.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .hover-bg:hover {
+        background-color: #f8f9fa;
+        transition: background-color 0.2s ease;
+    }
+
+    .line-height-1 {
+        line-height: 1;
+    }
+</style>

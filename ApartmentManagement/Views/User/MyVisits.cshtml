@@ -1,0 +1,53 @@
+@model IEnumerable<ApartmentManagement.Models.VisitRequest>
+
+@{
+    ViewData["Title"] = "My Visit Requests";
+}
+
+<h1>My Visit Requests</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Apartment</th>
+            <th>Building</th>
+            <th>Requested Date/Time</th>
+            <th>Suggested Date/Time</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var visit in Model)
+        {
+            <tr>
+                <td>@visit.Apartment?.ApartmentNumber</td>
+                <td>@visit.Apartment?.Building?.Name</td>
+                <td>@visit.RequestedDate.ToString("MM/dd/yyyy") @visit.RequestedTime</td>
+                <td>
+                    @if (visit.SuggestedDate.HasValue && visit.SuggestedTime.HasValue)
+                    {
+                        @visit.SuggestedDate.Value.ToString("MM/dd/yyyy") @visit.SuggestedTime.Value
+                    }
+                    else
+                    {
+                        <span>-</span>
+                    }
+                </td>
+                <td>@visit.Status</td>
+                <td>
+                    @if (visit.Status == ApartmentManagement.Models.VisitStatus.Rescheduled)
+                    {
+                        <form asp-action="AcceptRescheduledTime" method="post" style="display: inline;">
+                            <input type="hidden" name="visitId" value="@visit.Id" />
+                            <button type="submit" class="btn btn-sm btn-success">Accept New Time</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="BrowseApartments" class="btn btn-secondary">Browse More Apartments</a>
+

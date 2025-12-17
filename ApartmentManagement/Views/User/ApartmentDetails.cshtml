@@ -1,0 +1,262 @@
+@model ApartmentManagement.Models.Apartment
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = $"Apartment {Model.ApartmentNumber} Details";
+
+    // --- 1. IMAGE PROCESSING LOGIC ---
+    List<string> photoList = new List<string>();
+    string rawPhotos = Model.Photos ?? "";
+
+    try
+    {
+        if (!string.IsNullOrWhiteSpace(rawPhotos))
+        {
+            if (rawPhotos.Trim().StartsWith("["))
+            {
+                rawPhotos = rawPhotos.Replace("'", "\"");
+                var parsed = JsonSerializer.Deserialize<List<string>>(rawPhotos);
+                if (parsed != null && parsed.Any()) photoList = parsed;
+            }
+            else if (rawPhotos.Contains(","))
+            {
+                photoList = rawPhotos.Split(',').Select(p => p.Trim()).Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
+            }
+            else
+            {
+                photoList.Add(rawPhotos.Trim());
+            }
+        }
+    }
+    catch { }
+
+    // Fallback images
+    if (photoList.Count == 0) photoList.Add("https://placehold.co/800x600/e2e8f0/1e293b?text=No+Preview+Available");
+
+    // Ensure distinct images for thumbnail logic
+    var mainImage = photoList[0];
+}
+
+<main class="main">
+    <div class="page-title">
+        <div class="heading">
+            <div class="container">
+                <div class="row d-flex justify-content-center text-center">
+                    <div class="col-lg-8">
+                        <h1 class="heading-title">@Model.Building?.Name - Unit @Model.ApartmentNumber</h1>
+                        <p class="mb-0">
+                            @Model.Building?.FullAddress
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="breadcrumbs">
+            <div class="container">
+                <ol>
+                    <li><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li><a asp-controller="User" asp-action="BrowseApartments">Properties</a></li>
+                    <li class="current">Details</li>
+                </ol>
+            </div>
+        </nav>
+    </div><section id="property-details" class="property-details section">
+
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+            <div class="row gy-4">
+
+                <div class="col-lg-8">
+
+                    <div class="property-gallery" data-aos="fade-up" data-aos-delay="200">
+                        <div class="main-image-container image-zoom-container">
+                            <img id="main-product-image" src="@mainImage" alt="Apartment Main" class="img-fluid main-property-image" data-zoom="@mainImage">
+                            <div class="image-nav-buttons">
+                                <button class="image-nav-btn prev-image" type="button">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <button class="image-nav-btn next-image" type="button">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="thumbnail-gallery thumbnail-list">
+                            @foreach (var photo in photoList)
+                            {
+                                <div class="thumbnail-item @(photo == mainImage ? "active" : "")" data-image="@photo">
+                                    <img src="@photo" alt="Thumbnail" class="img-fluid">
+                                </div>
+                            }
+                        </div>
+                    </div><div class="property-description" data-aos="fade-up" data-aos-delay="300">
+                        <h3>About This Property</h3>
+                        @if (!string.IsNullOrEmpty(Model.Description))
+                        {
+                            <p>@Html.Raw(Model.Description.Replace("\n", "<br>"))</p>
+                        }
+                        else
+                        {
+                            <p>No description provided for this unit.</p>
+                        }
+                    </div><div class="property-reviews mt-5" data-aos="fade-up" data-aos-delay="350">
+                        <h3>Resident Reviews (@(Model.Reviews?.Count ?? 0))</h3>
+                        @if (Model.Reviews != null && Model.Reviews.Any())
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var review in Model.Reviews)
+                                {
+                                    <div class="list-group-item p-4 border rounded mb-3 bg-light">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h5 class="mb-0 fw-bold">@review.Title</h5>
+                                            <div class="text-warning small">
+                                                @for (int i = 0; i < 5; i++)
+                                                {
+                                                    <i class="bi @(i < review.Rating ? "bi-star-fill" : "bi-star")"></i>
+                                                }
+                                            </div>
+                                        </div>
+                                        <p class="text-muted mb-2">@review.Comment</p>
+                                        <small class="text-secondary"><i class="bi bi-person-circle"></i> @review.Tenant?.User?.FullName</small>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-light border text-center">
+                                No reviews yet for this apartment.
+                            </div>
+                        }
+                    </div>
+
+                    <div class="property-amenities" data-aos="fade-up" data-aos-delay="400">
+                        <h3>Amenities & Features</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4>Interior Features</h4>
+                                <ul class="features-list">
+                                    <li><i class="bi bi-check-circle"></i>Hardwood Floors</li>
+                                    <li><i class="bi bi-check-circle"></i>Updated Kitchen</li>
+                                    <li><i class="bi bi-check-circle"></i>Central Air Conditioning</li>
+                                    <li><i class="bi bi-check-circle"></i>High Ceilings</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h4>Exterior Features</h4>
+                                <ul class="features-list">
+                                    <li><i class="bi bi-check-circle"></i>Security System</li>
+                                    <li><i class="bi bi-check-circle"></i>Elevator Access</li>
+                                    <li><i class="bi bi-check-circle"></i>Modern Facade</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div><div class="property-map" data-aos="fade-up" data-aos-delay="500">
+                        <h3>Location</h3>
+                        <div class="map-container">
+                            <iframe src="https://maps.google.com/maps?q=@(Model.Building?.Name ?? "Lahore")&t=&z=13&ie=UTF8&iwloc=&output=embed" width="100" style="width:100%;border:0;" height="400" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+
+                    <div class="property-overview sticky-top" data-aos="fade-up" data-aos-delay="200">
+                        <div class="price-tag">Rs. @Model.BaseRentRate.ToString("N0")</div>
+                        <div class="property-status">@Model.Status</div>
+
+                        <div class="property-address">
+                            <h4>@Model.Building?.Name</h4>
+                            <p>@Model.Building?.FullAddress</p>
+                        </div>
+
+                        <div class="property-stats">
+                            <div class="stat-item">
+                                <i class="bi bi-grid"></i>
+                                <div>
+                                    <span class="value">@Model.Type</span>
+                                    <span class="label">Type</span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <i class="bi bi-layers"></i>
+                                <div>
+                                    <span class="value">@Model.FloorNumber</span>
+                                    <span class="label">Floor</span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <i class="bi bi-rulers"></i>
+                                <div>
+                                    <span class="value">@Model.Size</span>
+                                    <span class="label">Sq Ft</span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <i class="bi bi-star"></i>
+                                <div>
+                                    <span class="value">@(ViewBag.AverageRating != null ? ((double)ViewBag.AverageRating).ToString("F1") : "-")</span>
+                                    <span class="label">Rating</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-form">
+                            <h4>Schedule a Tour</h4>
+
+                            @if (User?.Identity != null && User.Identity.IsAuthenticated)
+                            {
+                                @if (!User.IsInRole("Tenant") && !User.IsInRole("Owner"))
+                                {
+                                    <form asp-action="BookVisit" method="post" class="php-email-form-static">
+                                        <input type="hidden" name="apartmentId" value="@Model.Id" />
+
+                                        <div class="row">
+                                            <div class="col-12 form-group">
+                                                <label class="form-label small fw-bold">Select Date</label>
+                                                <input type="date" name="requestedDate" class="form-control" required min="@DateTime.Today.ToString("yyyy-MM-dd")">
+                                            </div>
+                                            <div class="col-12 form-group mt-2">
+                                                <label class="form-label small fw-bold">Select Time</label>
+                                                <input type="time" name="requestedTime" class="form-control" required>
+                                            </div>
+
+                                            <div class="col-12 text-center mt-3">
+                                                <button type="submit" class="btn btn-primary w-100">Request Visit</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info mt-3 text-center">
+                                        Logged in as <strong>@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</strong>.<br>
+                                        <small>Only prospective tenants can book visits.</small>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-center p-3">
+                                    <i class="bi bi-lock fs-1 text-secondary"></i>
+                                    <p class="mb-3 mt-2 small text-muted">Please log in to schedule a viewing or contact the property manager.</p>
+                                    <a asp-controller="Account" asp-action="Login" class="btn btn-secondary w-100">Log In to Book</a>
+                                </div>
+                            }
+                        </div><div class="social-share mt-4">
+                            <h5>Share This Property</h5>
+                            <div class="share-buttons">
+                                <a href="#" class="share-btn facebook"><i class="bi bi-facebook"></i></a>
+                                <a href="#" class="share-btn twitter"><i class="bi bi-twitter-x"></i></a>
+                                <a href="#" class="share-btn whatsapp"><i class="bi bi-whatsapp"></i></a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+</main>

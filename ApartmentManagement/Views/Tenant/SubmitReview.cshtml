@@ -1,0 +1,80 @@
+@model ApartmentManagement.Models.Review
+
+@{
+    bool isEdit = Model.Id > 0;
+    ViewData["Title"] = isEdit ? "Edit Review" : "Submit Review";
+    var apartment = ViewBag.Apartment as ApartmentManagement.Models.Apartment;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            @if (apartment != null)
+            {
+                <div class="alert alert-info d-flex align-items-center mb-4 shadow-sm">
+                    <i class="bi bi-house-door-fill fs-3 me-3"></i>
+                    <div>
+                        <h5 class="mb-0 fw-bold">Unit @apartment.ApartmentNumber</h5>
+                        <small>@apartment.Building?.Name</small>
+                    </div>
+                </div>
+            }
+
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-star-half me-2"></i>@(isEdit ? "Edit Your Review" : "Write a Review")</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="SubmitReview" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="ApartmentId" />
+                        <input type="hidden" asp-for="TenantId" />
+                        <input type="hidden" asp-for="CreatedAt" />
+
+                        <div class="mb-4 text-center">
+                            <label class="form-label fw-bold d-block">How would you rate your experience?</label>
+                            <div class="btn-group" role="group" aria-label="Rating">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <input type="radio" class="btn-check" name="Rating" id="rating_@i" value="@i" @(Model.Rating == i ? "checked" : "") autocomplete="off">
+                                    <label class="btn btn-outline-warning text-dark" for="rating_@i" style="font-size: 1.2rem; padding: 10px 20px;">
+                                        @i <i class="bi bi-star-fill"></i>
+                                    </label>
+                                }
+                            </div>
+                            <span asp-validation-for="Rating" class="text-danger d-block mt-2"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Title" class="form-control" placeholder="Summarize your experience" />
+                            <label asp-for="Title">Review Title (e.g., "Great place to live!")</label>
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <textarea asp-for="Comment" class="form-control" placeholder="Leave a comment here" style="height: 150px"></textarea>
+                            <label asp-for="Comment">Detailed Feedback</label>
+                            <span asp-validation-for="Comment" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Reviews" class="btn btn-light border me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-bold">
+                                @(isEdit ? "Update Review" : "Submit Review")
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,270 @@
+@using ApartmentManagement.Models
+@model IEnumerable<ApartmentManagement.Models.VisitRequest>
+
+@{
+    ViewData["Title"] = "Visit Requests";
+}
+
+<section class="section">
+    <div class="container" data-aos="fade-up">
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+            <div>
+                <h2 class="fw-bold text-dark">Visit Requests</h2>
+                <p class="text-muted mb-0">Manage viewings and potential tenant schedules.</p>
+            </div>
+            <a asp-action="Dashboard" class="btn btn-outline-secondary fw-bold">
+                <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="table-responsive">
+                <table class="table mb-0 align-middle table-hover">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Apartment</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Applicant</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Contact</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Requested Time</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Status</th>
+                            <th class="py-3 px-4 text-end text-uppercase text-secondary small fw-bold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white">
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var visit in Model)
+                            {
+                                // Badge Logic
+                                string statusBadge = visit.Status switch
+                                {
+                                    VisitStatus.Pending => "bg-warning text-dark bg-opacity-25",
+                                    VisitStatus.Approved => "bg-primary text-primary bg-opacity-10",
+                                    VisitStatus.Visited => "bg-success text-success bg-opacity-10",
+                                    VisitStatus.Completed => "bg-success text-white",
+                                    VisitStatus.Rejected => "bg-danger text-danger bg-opacity-10",
+                                    VisitStatus.Rescheduled => "bg-info text-info bg-opacity-10",
+                                    _ => "bg-secondary text-secondary bg-opacity-10"
+                                };
+
+                                string statusIcon = visit.Status switch
+                                {
+                                    VisitStatus.Pending => "bi-hourglass-split",
+                                    VisitStatus.Approved => "bi-check-circle",
+                                    VisitStatus.Visited => "bi-geo-alt",
+                                    VisitStatus.Completed => "bi-flag",
+                                    VisitStatus.Rejected => "bi-x-circle",
+                                    VisitStatus.Rescheduled => "bi-arrow-repeat",
+                                    _ => "bi-circle"
+                                };
+
+                                <tr class="border-bottom">
+                                    <td class="px-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center me-3 bg-light text-primary" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-building fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark">Unit @visit.Apartment?.ApartmentNumber</div>
+                                                <div class="small text-muted">@visit.Apartment?.Building?.Name</div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <div class="fw-bold text-dark">@visit.User?.FullName</div>
+                                        <div class="badge bg-light text-secondary border fw-normal">Applicant</div>
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <div class="small mb-1">
+                                            <a href="mailto:@visit.User?.Email" class="text-decoration-none text-muted">
+                                                <i class="bi bi-envelope me-2"></i>@visit.User?.Email
+                                            </a>
+                                        </div>
+                                        <div class="small">
+                                            @if (!string.IsNullOrEmpty(visit.User?.PhoneNumber))
+                                            {
+                                                <a href="tel:@visit.User?.PhoneNumber" class="text-decoration-none text-muted">
+                                                    <i class="bi bi-telephone me-2"></i>@visit.User?.PhoneNumber
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted fst-italic"><i class="bi bi-telephone-x me-2"></i>No Phone</span>
+                                            }
+                                        </div>
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <div class="text-dark fw-bold">
+                                            <i class="bi bi-calendar-event me-2 text-muted"></i>@visit.RequestedDate.ToString("MMM dd, yyyy")
+                                        </div>
+                                        <div class="small text-muted ms-4">@visit.RequestedTime</div>
+
+                                        @if (visit.SuggestedDate.HasValue && visit.SuggestedTime.HasValue)
+                                        {
+                                            <div class="mt-2 p-2 rounded bg-light border border-info text-info small">
+                                                <i class="bi bi-arrow-return-right me-1"></i>
+                                                <strong>New:</strong> @visit.SuggestedDate.Value.ToString("MMM dd") at @visit.SuggestedTime.Value
+                                            </div>
+                                        }
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <span class="badge rounded-pill @statusBadge px-3 py-2">
+                                            <i class="bi @statusIcon me-1"></i> @visit.Status
+                                        </span>
+                                    </td>
+
+                                    <td class="px-4 py-3 text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+
+                                            @if (visit.Status == VisitStatus.Pending)
+                                            {
+                                                <form asp-action="ApproveVisit" method="post" class="d-inline">
+                                                    <input type="hidden" name="id" value="@visit.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-success text-white" title="Approve">
+                                                        <i class="bi bi-check-lg"></i>
+                                                    </button>
+                                                </form>
+
+                                                <button type="button" class="btn btn-sm btn-primary"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#suggestTimeModal"
+                                                        onclick="setModalId('@visit.Id')"
+                                                        title="Propose New Time">
+                                                    <i class="bi bi-calendar-plus"></i>
+                                                </button>
+
+                                                <button type="button" class="btn btn-sm btn-danger"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#rejectModal"
+                                                        onclick="setModalId('@visit.Id')"
+                                                        title="Reject">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            }
+                                            else if (visit.Status == VisitStatus.Approved || visit.Status == VisitStatus.Rescheduled)
+                                            {
+                                                <form asp-action="MarkAsVisited" method="post" class="d-inline">
+                                                    <input type="hidden" name="id" value="@visit.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-success fw-bold">
+                                                        Mark Visited
+                                                    </button>
+                                                </form>
+                                            }
+                                            else if (visit.Status == VisitStatus.Visited)
+                                            {
+                                                // Check if Apartment is Rented
+                                                bool isRented = visit.Apartment?.Status == ApartmentStatus.Rented;
+
+                                                if (isRented)
+                                                {
+                                                    <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" title="Unit is currently occupied">
+                                                        <button class="btn btn-sm btn-secondary disabled" type="button" style="pointer-events: none;">
+                                                            <i class="bi bi-lock-fill me-1"></i> Occupied
+                                                        </button>
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <a asp-action="ConvertToTenant" asp-route-visitRequestId="@visit.Id" class="btn btn-sm btn-primary fw-bold">
+                                                        <i class="bi bi-person-plus me-1"></i> Convert
+                                                    </a>
+                                                }
+                                            }
+                                            else if (visit.Status == VisitStatus.Completed)
+                                            {
+                                                <span class="badge bg-light text-success border">Converted</span>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="text-muted mb-3"><i class="bi bi-calendar-x" style="font-size: 3rem;"></i></div>
+                                    <h5 class="text-muted">No Visit Requests</h5>
+                                    <p class="small text-muted">Wait for potential tenants to book a viewing.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="suggestTimeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold"><i class="bi bi-calendar-week me-2 text-primary"></i>Suggest New Time</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="SuggestNewTime" method="post">
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="modalVisitId_Suggest" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">New Date</label>
+                        <input type="date" name="suggestedDate" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">New Time</label>
+                        <input type="time" name="suggestedTime" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary fw-bold">Send Suggestion</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Reject Request</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="RejectVisit" method="post">
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="modalVisitId_Reject" />
+                    <p class="text-muted">Are you sure you want to reject this visit request? The user will be notified immediately.</p>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger fw-bold">Reject Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Initialize Bootstrap Tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+
+        // Pass ID to Modals
+        function setModalId(id) {
+            document.getElementById('modalVisitId_Suggest').value = id;
+            document.getElementById('modalVisitId_Reject').value = id;
+        }
+    </script>
+}

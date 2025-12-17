@@ -1,0 +1,194 @@
+@using ApartmentManagement.Models
+@model IEnumerable<ApartmentManagement.Models.VenueBooking>
+
+@{
+    ViewData["Title"] = "Venue Bookings";
+}
+
+<section class="section">
+    <div class="container" data-aos="fade-up">
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+            <div>
+                <h2 class="fw-bold text-dark">Venue Bookings</h2>
+                <p class="text-muted mb-0">Manage reservations for community halls and spaces.</p>
+            </div>
+            <a asp-action="Dashboard" class="btn btn-outline-secondary fw-bold">
+                <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="table-responsive">
+                <table class="table mb-0 align-middle table-hover">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Tenant Info</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Venue & Purpose</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Date & Time</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Guests</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Status</th>
+                            <th class="py-3 px-4 text-end text-uppercase text-secondary small fw-bold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white">
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var booking in Model)
+                            {
+                                // --- Presentation Logic ---
+                                string badgeClass = booking.Status switch
+                                {
+                                    VenueBookingStatus.Pending => "bg-warning text-dark bg-opacity-25",
+                                    VenueBookingStatus.Approved => "bg-success text-success bg-opacity-10",
+                                    VenueBookingStatus.Rejected => "bg-danger text-danger bg-opacity-10",
+                                    _ => "bg-secondary"
+                                };
+
+                                // Calculate End Time (Assuming default 3 hours if Duration not in model)
+                                DateTime start = DateTime.Today.Add(booking.BookingTime);
+                                DateTime end = start.AddHours(3);
+                                string timeRange = $"{start:hh:mm tt} - {end:hh:mm tt}";
+
+                                <tr class="border-bottom">
+                                    <td class="px-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center me-2 bg-light text-primary fw-bold"
+                                                 style="width: 35px; height: 35px;">
+                                                @(booking.Tenant?.User?.FullName?.Substring(0, 1) ?? "T")
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark">@booking.Tenant?.User?.FullName</div>
+                                                <div class="small text-muted">Unit @booking.Tenant?.Apartment?.ApartmentNumber</div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <div class="fw-bold text-dark">@booking.VenueType</div>
+                                        <div class="small text-muted text-truncate" style="max-width: 150px;">@booking.Purpose</div>
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <div class="fw-bold"><i class="bi bi-calendar3 me-1 text-muted"></i> @booking.BookingDate.ToString("MMM dd, yyyy")</div>
+                                        <div class="small text-muted"><i class="bi bi-clock me-1"></i> @timeRange</div>
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <span class="badge bg-light text-dark border">
+                                            <i class="bi bi-people me-1"></i> @booking.NumberOfGuests Guests
+                                        </span>
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <span class="badge rounded-pill @badgeClass px-3 py-2">
+                                            @booking.Status
+                                        </span>
+                                    </td>
+
+                                    <td class="px-4 py-3 text-end">
+                                        @if (booking.Status == VenueBookingStatus.Pending)
+                                        {
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-sm btn-success"
+                                                        data-bs-toggle="modal" data-bs-target="#approveModal_@booking.Id"
+                                                        title="Approve">
+                                                    <i class="bi bi-check-lg"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-danger"
+                                                        data-bs-toggle="modal" data-bs-target="#rejectModal_@booking.Id"
+                                                        title="Reject">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-outline-secondary" disabled>Closed</button>
+                                        }
+                                    </td>
+                                </tr>
+
+                                <div class="modal fade" id="approveModal_@booking.Id" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-success text-white">
+                                                <h5 class="modal-title fw-bold"><i class="bi bi-check-circle me-2"></i>Approve Booking</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form asp-action="ApproveVenueBooking" method="post">
+                                                <div class="modal-body p-4">
+                                                    <input type="hidden" name="id" value="@booking.Id" />
+
+                                                    <div class="alert alert-light border mb-3">
+                                                        <strong>Note to Tenants:</strong> A notification will be sent blocking the venue
+                                                        from <strong>@start.AddHours(-1).ToString("hh:mm tt")</strong> to
+                                                        <strong>@end.AddHours(1).ToString("hh:mm tt")</strong> (1 hour buffer).
+                                                    </div>
+
+                                                    <div class="form-check form-switch mb-3 p-3 bg-light rounded border">
+                                                        <input class="form-check-input" type="checkbox" name="cleaningScheduled" value="true" id="cleaning_@booking.Id" checked>
+                                                        <label class="form-check-label fw-bold" for="cleaning_@booking.Id">
+                                                            Schedule Cleaning Service?
+                                                        </label>
+                                                        <div class="small text-muted mt-1">Cleaning fee will be added to tenant's next bill if applicable.</div>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold small text-muted">Admin Notes (Optional)</label>
+                                                        <textarea name="adminNotes" class="form-control" rows="2"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer border-0">
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-success fw-bold">Confirm Approval</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal fade" id="rejectModal_@booking.Id" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-danger text-white">
+                                                <h5 class="modal-title fw-bold"><i class="bi bi-x-circle me-2"></i>Reject Booking</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form asp-action="RejectVenueBooking" method="post">
+                                                <div class="modal-body p-4">
+                                                    <input type="hidden" name="id" value="@booking.Id" />
+
+                                                    <p class="text-muted mb-3">Are you sure you want to reject this request for <strong>@booking.VenueType</strong>?</p>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold small text-muted">Reason for Rejection (Required)</label>
+                                                        <textarea name="adminNotes" class="form-control" rows="3" required placeholder="e.g., Venue under maintenance..."></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer border-0">
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-danger fw-bold">Reject Request</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="text-muted mb-3"><i class="bi bi-calendar-event" style="font-size: 3rem;"></i></div>
+                                    <h5 class="text-muted">No bookings found</h5>
+                                    <p class="small text-muted">Venue schedule is currently clear.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

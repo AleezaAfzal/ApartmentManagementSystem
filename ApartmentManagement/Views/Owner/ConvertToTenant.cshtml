@@ -1,0 +1,221 @@
+@using System.Linq
+@model ApartmentManagement.Models.Tenant
+
+@{
+    ViewData["Title"] = "Convert to Tenant";
+    var visitRequest = ViewBag.VisitRequest as ApartmentManagement.Models.VisitRequest;
+    // We don't need the list anymore since we aren't using a dropdown
+}
+
+@if (visitRequest == null)
+{
+    <div class="container py-4">
+        <div class="alert alert-warning">
+            <h5 class="alert-heading">Missing Visit Request</h5>
+            <p>The visit request required to convert a user to a tenant was not provided.</p>
+            <a asp-action="VisitRequests" class="btn btn-outline-secondary">Back to Requests</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container py-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="mb-1">Onboard New Tenant</h2>
+                <p class="text-muted">Finalize lease details for <strong>@(visitRequest?.User?.FullName ?? "Unknown")</strong>.</p>
+            </div>
+            <a asp-action="VisitRequests" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Cancel
+            </a>
+        </div>
+
+        <form asp-action="ConvertToTenant" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="visitRequestId" value="@visitRequest?.Id" />
+            <input type="hidden" name="UserId" value="@visitRequest?.User?.Id" />
+
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-light py-3">
+                            <h5 class="mb-0 text-primary"><i class="fas fa-file-contract me-2"></i>Lease Agreement</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+
+                                <div class="col-md-12">
+                                    <label class="form-label fw-bold">Assigned Unit</label>
+                                    <input type="text" class="form-control bg-light"
+                                           value="@visitRequest?.Apartment?.Building?.Name - Unit @visitRequest?.Apartment?.ApartmentNumber"
+                                           readonly />
+                                    <input type="hidden" asp-for="ApartmentId" value="@visitRequest?.ApartmentId" />
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label asp-for="ContractStartDate" class="form-label fw-bold">Lease Start Date</label>
+                                    <input asp-for="ContractStartDate" class="form-control" type="date" id="ContractStartDate" />
+                                    <span asp-validation-for="ContractStartDate" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label asp-for="RentPlanMonths" class="form-label fw-bold">Duration</label>
+                                    <div class="input-group">
+                                        <input asp-for="RentPlanMonths" class="form-control" type="number" min="1" max="60" id="RentPlanMonths" />
+                                        <span class="input-group-text">Months</span>
+                                    </div>
+                                    <span asp-validation-for="RentPlanMonths" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-muted">End Date</label>
+                                    <input type="date" class="form-control bg-light" id="CalculatedEndDate" readonly />
+                                    <div class="form-text small" id="EndDateText"></div>
+                                </div>
+
+                                <hr class="my-4 text-muted">
+
+                                <div class="col-md-6">
+                                    <label asp-for="MonthlyRent" class="form-label fw-bold">Monthly Rent</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rs.</span>
+                                        <input asp-for="MonthlyRent" class="form-control" type="number" />
+                                    </div>
+                                    <span asp-validation-for="MonthlyRent" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="SecurityDeposit" class="form-label fw-bold">Security Deposit</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rs.</span>
+                                        <input asp-for="SecurityDeposit" class="form-control" type="number" />
+                                    </div>
+                                    <span asp-validation-for="SecurityDeposit" class="text-danger"></span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light py-3">
+                            <h5 class="mb-0 text-primary"><i class="fas fa-paperclip me-2"></i>Documentation</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="mb-3">
+                                <label for="agreementDocument" class="form-label fw-bold">Signed Lease Agreement (PDF)</label>
+                                <input type="file" name="agreementDocument" class="form-control" accept=".pdf,.jpg,.png" />
+                                <div class="form-text">Upload the signed contract. Allowed: PDF, JPG, PNG.</div>
+                            </div>
+
+                            <div class="mb-0">
+                                <label asp-for="Notes" class="form-label fw-bold">Admin Notes</label>
+                                <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Any special conditions..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-dark text-white py-3">
+                            <h5 class="mb-0"><i class="fas fa-user-shield me-2"></i>Personal Info</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="text-center mb-4">
+                                <div class="rounded-circle bg-light text-primary d-inline-flex justify-content-center align-items-center mb-2" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <h5 class="fw-bold">@visitRequest?.User?.FullName</h5>
+                                <p class="text-muted small">@visitRequest?.User?.Email</p>
+                                <p class="text-muted small">@visitRequest?.User?.PhoneNumber</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="CNIC" class="form-label fw-bold">CNIC / ID Number</label>
+                                <input asp-for="CNIC" class="form-control" placeholder="Identity Number" />
+                                <span asp-validation-for="CNIC" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="PermanentAddress" class="form-label fw-bold">Permanent Address</label>
+                                <textarea asp-for="PermanentAddress" class="form-control" rows="4" placeholder="Full permanent residence address"></textarea>
+                                <span asp-validation-for="PermanentAddress" class="text-danger"></span>
+                            </div>
+
+                            <hr />
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary py-2 fw-bold">
+                                    <i class="fas fa-check-circle me-2"></i> Confirm & Onboard
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // 1. Get Elements by specific IDs
+                const startDateInput = document.getElementById('ContractStartDate');
+                const durationInput = document.getElementById('RentPlanMonths');
+                const endDateInput = document.getElementById('CalculatedEndDate');
+                const endDateText = document.getElementById('EndDateText');
+
+                // 2. Calculation Logic
+                function calculateEndDate() {
+                    const startDateVal = startDateInput.value;
+                    const months = parseInt(durationInput.value);
+
+                    if (startDateVal && months && months > 0) {
+                        // Prevent TimeZone issues by splitting Y-M-D manually
+                        const parts = startDateVal.split('-');
+                        const year = parseInt(parts[0]);
+                        const monthIndex = parseInt(parts[1]) - 1; // JS months are 0-11
+                        const day = parseInt(parts[2]);
+
+                        const date = new Date(year, monthIndex, day);
+
+                        // Add Months
+                        date.setMonth(date.getMonth() + months);
+
+                        // Standard Lease Logic: End date is usually 1 day before the anniversary
+                        // (e.g., Jan 1st to Dec 31st)
+                        date.setDate(date.getDate() - 1);
+
+                        // Format back to YYYY-MM-DD
+                        const newYear = date.getFullYear();
+                        const newMonth = String(date.getMonth() + 1).padStart(2, '0');
+                        const newDay = String(date.getDate()).padStart(2, '0');
+
+                        const formattedDate = `${newYear}-${newMonth}-${newDay}`;
+
+                        // Update UI
+                        endDateInput.value = formattedDate;
+                        endDateText.textContent = `Lease Ends: ${date.toDateString()}`;
+                    } else {
+                        endDateInput.value = '';
+                        endDateText.textContent = '';
+                    }
+                }
+
+                // 3. Add Event Listeners
+                if(startDateInput && durationInput) {
+                    startDateInput.addEventListener('change', calculateEndDate);
+                    durationInput.addEventListener('input', calculateEndDate);
+
+                    // Run once on load
+                    calculateEndDate();
+                }
+            });
+        </script>
+    }
+}

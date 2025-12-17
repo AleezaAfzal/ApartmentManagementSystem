@@ -1,0 +1,466 @@
+@model ApartmentManagement.ViewModels.AddApartmentViewModel
+
+@{
+    ViewData["Title"] = "Add New Unit";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700&family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+<style>
+    a {
+        text-decoration: none !important;
+    }
+
+    .btn-light {
+        text-decoration: none !important;
+    }
+    /* --- PROFESSIONAL THEME VARIABLES --- */
+    :root {
+        --accent-color: #264653;
+        --heading-color: #111827;
+        --text-muted: #6b7280;
+        --input-bg: #f9fafb;
+        --input-border: #e5e7eb;
+        --font-heading: 'Raleway', sans-serif;
+        --font-body: 'Roboto', sans-serif;
+    }
+
+    body {
+        background-color: #f3f4f6;
+        font-family: var(--font-body);
+        color: #374151;
+    }
+
+    /* --- LAYOUT & CARD --- */
+    .form-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 15px;
+    }
+
+    .pro-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0,0,0,0.02);
+        overflow: hidden;
+    }
+
+    .card-header-custom {
+        background: #fff;
+        padding: 30px 40px;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    /* --- SECTION HEADERS --- */
+    .section-title {
+        font-family: var(--font-heading);
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--heading-color);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .section-title i {
+            color: var(--accent-color);
+            background: rgba(46, 202, 106, 0.1);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+    /* --- SEAMLESS INPUT GROUPS --- */
+    .input-group-seamless {
+        background-color: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        padding: 2px;
+    }
+
+        .input-group-seamless:focus-within {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(46, 202, 106, 0.15);
+            background-color: #fff;
+        }
+
+        .input-group-seamless .input-icon {
+            padding: 0 15px;
+            color: #9ca3af;
+            font-size: 1.1rem;
+        }
+
+        .input-group-seamless:focus-within .input-icon {
+            color: var(--accent-color);
+        }
+
+        .input-group-seamless .form-control,
+        .input-group-seamless .form-select {
+            border: none;
+            background: transparent;
+            padding: 12px 0;
+            font-size: 0.95rem;
+            color: #374151;
+            box-shadow: none !important;
+        }
+
+    .form-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 6px;
+        margin-left: 2px;
+    }
+
+    /* --- PRO UPLOAD ZONE --- */
+    .upload-area {
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        background-color: #f8fafc;
+        padding: 40px;
+        text-align: center;
+        transition: 0.3s;
+        cursor: pointer;
+        position: relative;
+    }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--accent-color);
+            background-color: #f0fdf4;
+        }
+
+    .upload-icon-circle {
+        width: 60px;
+        height: 60px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px auto;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    /* --- FOOTER ACTIONS --- */
+    .form-actions {
+        background: #f9fafb;
+        padding: 20px 40px;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+    }
+
+    .btn-save {
+        background-color: var(--accent-color);
+        color: white;
+        font-weight: 600;
+        padding: 10px 24px;
+        border-radius: 8px;
+        border: none;
+        transition: 0.2s;
+    }
+
+        .btn-save:hover {
+            background-color: #1d3640;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(38, 70, 83, 0.25);
+        }
+
+    /* Preview Thumbs */
+    .preview-thumb {
+        width: 100%;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .remove-btn {
+        position: absolute;
+        top: -5px;
+        right: 5px;
+        background: #dc3545;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+
+    .text-danger {
+        font-size: 0.8rem;
+        margin-top: 4px;
+        display: block;
+    }
+</style>
+
+<div class="form-container">
+    <form asp-action="AddApartment" method="post" enctype="multipart/form-data" id="uploadForm">
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+        <input asp-for="BuildingId" type="hidden" />
+
+        <div class="pro-card" data-aos="fade-up">
+
+            <div class="card-header-custom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="fw-bold mb-1" style="font-family: var(--font-heading); color: #111;">Add New Unit</h2>
+                        <p class="text-muted mb-0 small">Fill in the details to list a new apartment available for rent.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 p-md-5">
+
+                <div class="mb-5">
+                    <h5 class="section-title"><i class="bi bi-house-gear"></i> Unit Specifications</h5>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <label asp-for="ApartmentNumber" class="form-label">Unit Number</label>
+                            <div class="input-group-seamless">
+                                <i class="bi bi-hash input-icon"></i>
+                                <input asp-for="ApartmentNumber" class="form-control" placeholder="e.g. 304-B" />
+                            </div>
+                            <span asp-validation-for="ApartmentNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="FloorNumber" class="form-label">Floor Level</label>
+                            <div class="input-group-seamless">
+                                <i class="bi bi-layers input-icon"></i>
+                                <input asp-for="FloorNumber" type="number" class="form-control" placeholder="e.g. 3" />
+                            </div>
+                            <span asp-validation-for="FloorNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Type" class="form-label">Unit Type</label>
+                            <div class="input-group-seamless">
+                                <i class="bi bi-grid input-icon"></i>
+                                <select asp-for="Type" class="form-select" asp-items="Html.GetEnumSelectList<ApartmentManagement.Models.ApartmentType>()">
+                                    <option value="">-- Select --</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="Type" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <h5 class="section-title"><i class="bi bi-currency-dollar"></i> Financials & Dimensions</h5>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label asp-for="BaseRentRate" class="form-label">Monthly Rent (PKR)</label>
+
+                            <div class="input-group-seamless">
+                                <span class="input-icon fw-bold" style="font-size: 0.9rem;">Rs.</span>
+
+                                <input asp-for="BaseRentRate" type="number" step="500" class="form-control" placeholder="e.g.45000" />
+                            </div>
+                            <span asp-validation-for="BaseRentRate" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Size" class="form-label">Total Area (Sq Ft)</label>
+                            <div class="input-group-seamless">
+                                <i class="bi bi-aspect-ratio input-icon"></i>
+                                <input asp-for="Size" type="number" step="0.1" class="form-control" placeholder="e.g. 1200" />
+                            </div>
+                            <span asp-validation-for="Size" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label">Marketing Description</label>
+                            <div class="input-group-seamless align-items-start pt-2">
+                                <i class="bi bi-text-paragraph input-icon mt-2"></i>
+                                <textarea asp-for="Description" rows="4" class="form-control" placeholder="Highlight features like 'Sunny view', 'Newly renovated' etc."></textarea>
+                            </div>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <h5 class="section-title"><i class="bi bi-images"></i> Media Gallery</h5>
+
+                    <input type="file" name="photos" multiple accept="image/*" id="file-input" class="d-none" />
+
+                    <div id="drop-zone" class="upload-area">
+                        <div class="upload-icon-circle">
+                            <i class="bi bi-cloud-arrow-up fs-3" style="color: var(--accent-color);"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Click or Drag Photos Here</h6>
+                        <p class="text-muted small mb-0">High quality images increase rental chances.</p>
+                        <p class="text-muted" style="font-size: 0.75rem;">JPG, PNG or WEBP (Max 5MB)</p>
+                    </div>
+
+                    <div id="photo-error" class="alert alert-danger mt-3 py-2 small d-none">
+                        <i class="bi bi-exclamation-circle me-1"></i> Please upload at least 1 photo.
+                    </div>
+
+                    <div id="preview" class="row g-3 mt-3"></div>
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+                <a asp-action="Dashboard" class="btn btn-light text-muted border text-decoration-none d-flex align-items-center">Cancel</a>
+                <button type="submit" class="btn btn-save">
+                    <i class="bi bi-check2-circle me-1"></i> Publish Listing
+                </button>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        AOS.init();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('file-input');
+            const preview = document.getElementById('preview');
+            const photoError = document.getElementById('photo-error');
+            const form = document.getElementById('uploadForm');
+
+            // --- Drag & Drop Visuals ---
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            ['dragenter', 'dragover'].forEach(evt => {
+                dropZone.addEventListener(evt, (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+            });
+            ['dragleave', 'drop'].forEach(evt => {
+                dropZone.addEventListener(evt, (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+            });
+
+            // --- Handle Files ---
+            dropZone.addEventListener('drop', (e) => {
+                const newFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+                addFiles(newFiles);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const newFiles = Array.from(e.target.files);
+                addFiles(newFiles);
+            });
+
+            function addFiles(newFiles) {
+                const dt = new DataTransfer();
+
+                // 1. Merge existing files with the new files
+                const allFiles = [...Array.from(fileInput.files), ...newFiles];
+
+                // 2. Map to track unique file names
+                const uniqueMap = new Map();
+
+                allFiles.forEach(file => {
+                    // Get the name without extension (e.g., "living_room" from "living_room.png")
+                    const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+
+                    // If this is the first time we see this image name, add it
+                    if (!uniqueMap.has(baseName)) {
+                        uniqueMap.set(baseName, file);
+                    } else {
+                        // COLLISION: We already have a file with this name.
+                        // Check if the NEW one is better (e.g., prefer PNG/JPG over AVIF)
+                        const currentFile = uniqueMap.get(baseName);
+
+                        // Check extensions
+                        const isCurrentBad = currentFile.name.toLowerCase().endsWith('.avif') || currentFile.name.toLowerCase().endsWith('.heic');
+                        const isNewBad = file.name.toLowerCase().endsWith('.avif') || file.name.toLowerCase().endsWith('.heic');
+
+                        // If the one we have is AVIF, but the new one is Standard (PNG/JPG), swap it!
+                        if (isCurrentBad && !isNewBad) {
+                            uniqueMap.set(baseName, file);
+                        }
+                    }
+                });
+
+                // 3. Add only the unique/best files to the DataTransfer object
+                uniqueMap.forEach(file => {
+                    dt.items.add(file);
+                });
+
+                // 4. Update the input and the preview
+                fileInput.files = dt.files;
+                updatePreview();
+            }
+
+            function updatePreview() {
+                preview.innerHTML = '';
+                const files = fileInput.files;
+
+                if (files.length > 0) photoError.classList.add('d-none');
+
+                Array.from(files).forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const div = document.createElement('div');
+                        div.className = 'col-6 col-md-3 col-lg-2 position-relative';
+                        div.innerHTML = `
+                            <img src="${e.target.result}" class="preview-thumb shadow-sm">
+                            <button type="button" class="remove-btn" onclick="removePhoto(${index})">×</button>
+                        `;
+                        preview.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // Expose removePhoto to global scope for onclick attribute
+            window.removePhoto = function(index) {
+                const dt = new DataTransfer();
+                const files = fileInput.files;
+
+                for (let i = 0; i < files.length; i++) {
+                    if (i !== index) dt.items.add(files[i]);
+                }
+
+                fileInput.files = dt.files;
+                updatePreview();
+            };
+
+            // --- Form Validation ---
+            form.addEventListener('submit', (e) => {
+                if (fileInput.files.length < 1) {
+                    e.preventDefault();
+                    photoError.classList.remove('d-none');
+                    // Scroll to error
+                    photoError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    photoError.classList.add('d-none');
+                }
+            });
+        });
+    </script>
+}

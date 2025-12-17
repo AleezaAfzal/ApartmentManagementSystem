@@ -1,0 +1,162 @@
+@model ApartmentManagement.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+    ViewData["PageType"] = "Auth";
+}
+
+<style>
+    /* We use the variables defined in main.css so this page
+           perfectly matches your global theme.
+        */
+    .login-section {
+        background: url('https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80') center center;
+        background-size: cover;
+        position: relative;
+        min-height: 100vh;
+        padding: 80px 0;
+        font-family: var(--default-font, "Roboto", sans-serif);
+    }
+
+    .login-overlay {
+        position: absolute;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.6); /* Darker overlay for better text contrast */
+        backdrop-filter: blur(2px);
+    }
+
+    .login-card {
+        /* Using white with slight transparency for that "Luxury" feel */
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 12px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Typography matches main.css */
+    .login-title {
+        font-family: var(--heading-font, "Raleway", sans-serif);
+        color: var(--heading-color, #111827);
+        font-weight: 700;
+    }
+
+    .login-subtitle {
+        color: var(--default-color, #4b5563);
+    }
+
+    /* Floating labels styling */
+    .form-floating > label {
+        color: var(--default-color, #4b5563);
+        opacity: 0.8;
+    }
+
+    .form-control:focus {
+        border-color: var(--accent-color, #2eca6a);
+        box-shadow: 0 0 0 0.25rem rgba(46, 202, 106, 0.25); /* Fallback green shadow */
+    }
+
+    /* Theme Button */
+    .btn-theme {
+        background-color: var(--accent-color, #2eca6a);
+        color: #ffffff; /* Always white text on accent button */
+        font-family: var(--heading-font, "Raleway", sans-serif);
+        font-weight: 600;
+        border: none;
+        padding: 14px;
+        transition: all 0.3s ease;
+        letter-spacing: 0.5px;
+    }
+
+        .btn-theme:hover {
+            /* Brightness filter handles hover state for any color */
+            filter: brightness(90%);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+    /* Links */
+    .link-theme {
+        color: var(--accent-color, #2eca6a);
+        font-weight: 600;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .link-theme:hover {
+            color: var(--heading-color, #111827);
+            text-decoration: underline;
+        }
+</style>
+
+<main class="main">
+
+    <section class="login-section d-flex align-items-center justify-content-center">
+        <div class="login-overlay"></div>
+
+        <div class="container position-relative">
+            <div class="row justify-content-center">
+                <div class="col-lg-5 col-md-7 col-sm-10">
+
+                    <div class="card login-card p-4 p-md-5" data-aos="fade-up" data-aos-duration="1000">
+                        <div class="card-body p-0">
+
+                            <div class="text-center mb-5" data-aos="fade-down" data-aos-delay="100">
+                                <h2 class="login-title mb-2">Welcome Back</h2>
+                                <p class="login-subtitle mb-0">Sign in to your property portal</p>
+                            </div>
+
+                            <form asp-action="Login" method="post" class="needs-validation" novalidate>
+
+                                <div asp-validation-summary="ModelOnly" class="alert alert-danger text-sm mb-4 border-0 shadow-sm" role="alert"></div>
+
+                                <div class="form-floating mb-3" data-aos="fade-up" data-aos-delay="200">
+                                    <input asp-for="Email" class="form-control" id="floatingEmail" placeholder="name@example.com" />
+                                    <label asp-for="Email" for="floatingEmail">Email Address</label>
+                                    <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
+                                </div>
+
+                                <div class="form-floating mb-4" data-aos="fade-up" data-aos-delay="300">
+                                    <input asp-for="Password" type="password" class="form-control" id="floatingPassword" placeholder="Password" />
+                                    <label asp-for="Password" for="floatingPassword">Password</label>
+                                    <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+                                </div>
+
+                                <div class="form-check mb-4" data-aos="fade-up" data-aos-delay="400">
+                                    <input asp-for="RememberMe" class="form-check-input" type="checkbox" id="rememberCheck" style="cursor: pointer;" />
+                                    <label asp-for="RememberMe" class="form-check-label login-subtitle" for="rememberCheck" style="cursor: pointer; user-select: none;">
+                                        Remember me
+                                    </label>
+                                </div>
+
+                                <div data-aos="fade-up" data-aos-delay="500">
+                                    <button type="submit" class="btn btn-theme w-100 rounded-3">
+                                        Login
+                                    </button>
+                                </div>
+
+                            </form>
+
+                            <div class="text-center mt-4" data-aos="fade-in" data-aos-delay="700">
+                                <span class="login-subtitle">Don't have an account?</span>
+                                <a asp-action="Register" class="link-theme ms-1">
+                                    Register here
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

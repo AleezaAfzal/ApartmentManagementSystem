@@ -1,0 +1,127 @@
+@model IEnumerable<ApartmentManagement.Models.VenueBooking>
+
+@{
+    ViewData["Title"] = "My Venue Bookings";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">My Venue Bookings</h2>
+            <p class="text-muted mb-0">Manage your upcoming events and reservations.</p>
+        </div>
+        <a asp-action="BookVenue" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-lg"></i> Book New Venue
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-0">
+            @if (!Model.Any())
+            {
+                // Empty State
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="text-muted">No bookings found</h5>
+                    <p class="text-secondary small">You haven't booked any venues yet.</p>
+                    <a asp-action="BookVenue" class="btn btn-outline-primary btn-sm mt-2">Book Now</a>
+                </div>
+            }
+            else
+            {
+                // Table Design
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-secondary text-uppercase small">
+                            <tr>
+                                <th class="ps-4 py-3">Venue</th>
+                                <th class="py-3">Date & Time</th>
+                                <th class="py-3">Purpose</th>
+                                <th class="py-3">Guests</th>
+                                <th class="py-3 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var booking in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-primary bg-opacity-10 p-2 me-3 text-primary">
+                                                <i class="bi bi-building"></i>
+                                            </div>
+                                            <span class="fw-bold text-dark">@booking.VenueType</span>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-semibold">@booking.BookingDate.ToString("MMM dd, yyyy")</span>
+                                            <span class="small text-muted">
+                                                @DateTime.Today.Add(booking.BookingTime).ToString("t")
+                                                @if (booking.EndTime.HasValue)
+                                                {
+                                                    <span> - @DateTime.Today.Add(booking.EndTime.Value).ToString("t")</span>
+                                                }
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <span class="d-block text-truncate" style="max-width: 150px;" title="@booking.Purpose">
+                                            @booking.Purpose
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        @if (booking.NumberOfGuests.HasValue)
+                                        {
+                                            <span class="badge bg-light text-dark border">
+                                                <i class="bi bi-people-fill me-1"></i> @booking.NumberOfGuests
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+
+                                    <td class="text-center">
+                                        @{
+                                            var statusColor = booking.Status switch
+                                            {
+                                                ApartmentManagement.Models.VenueBookingStatus.Approved => "success",
+                                                ApartmentManagement.Models.VenueBookingStatus.Rejected => "danger",
+                                                ApartmentManagement.Models.VenueBookingStatus.Completed => "secondary",
+                                                _ => "warning" // Pending
+                                            };
+
+                                            var statusIcon = booking.Status switch
+                                            {
+                                                ApartmentManagement.Models.VenueBookingStatus.Approved => "check-circle-fill",
+                                                ApartmentManagement.Models.VenueBookingStatus.Rejected => "x-circle-fill",
+                                                ApartmentManagement.Models.VenueBookingStatus.Completed => "flag-fill",
+                                                _ => "clock-fill"
+                                            };
+                                        }
+                                        <span class="badge rounded-pill bg-@statusColor bg-opacity-75">
+                                            <i class="bi bi-@statusIcon me-1"></i> @booking.Status
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="Dashboard" class="btn btn-link text-decoration-none text-muted ps-0">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>

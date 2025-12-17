@@ -1,0 +1,116 @@
+﻿@model ApartmentManagement.Models.Tenant
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container py-5">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold text-dark"><i class="bi bi-person-lines-fill me-2 text-primary"></i>My Profile</h2>
+            <p class="text-muted">Manage your personal information and view lease details.</p>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success rounded-3 mb-4 shadow-sm border-0 d-flex align-items-center">
+            <i class="bi bi-check-circle-fill me-3 fs-4"></i>
+            <div>@TempData["Success"]</div>
+        </div>
+    }
+
+    <div class="row g-4">
+
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="mb-0 fw-bold text-secondary">Edit Personal Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Profile" method="post">
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control bg-light" id="username" value="@Model.User?.Email" readonly disabled />
+                            <label for="username">Username / Email</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" name="FullName" class="form-control" id="fullName" placeholder="Full Name" value="@Model.User?.FullName" required />
+                            <label for="fullName">Full Name</label>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="tel" name="PhoneNumber" class="form-control" id="phone" placeholder="Phone Number" value="@Model.User?.PhoneNumber" />
+                            <label for="phone">Phone Number</label>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-5">
+                            <a asp-action="Dashboard" class="btn btn-outline-secondary rounded-pill px-4">Back to Dashboard</a>
+                            <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-primary text-white" style="background: linear-gradient(145deg, #0d6efd, #0a58ca);">
+                <div class="card-body p-4 position-relative overflow-hidden">
+
+                    <i class="bi bi-building position-absolute text-white" style="opacity: 0.1; font-size: 10rem; bottom: -20px; right: -20px;"></i>
+
+                    <h5 class="fw-bold text-uppercase border-bottom border-white border-opacity-25 pb-3 mb-4" style="letter-spacing: 1px;">
+                        Lease Details
+                    </h5>
+
+                    <div class="mb-4">
+                        <small class="text-white-50 text-uppercase d-block fw-bold mb-1">Building</small>
+                        <span class="fs-4 fw-bold">@(Model.Apartment?.Building?.Name ?? "Not Assigned")</span>
+
+                        @if (Model.Apartment?.Building != null)
+                        {
+                            <div class="small opacity-75 mt-1">
+                                <i class="bi bi-geo-alt me-1"></i> @Model.Apartment.Building.FullAddress, @Model.Apartment.Building.City
+                            </div>
+                        }
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <small class="text-white-50 text-uppercase d-block fw-bold mb-1">Apartment No.</small>
+                            <span class="fs-5">@(Model.Apartment?.ApartmentNumber ?? "-")</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-white-50 text-uppercase d-block fw-bold mb-1">Type</small>
+                            <span class="fs-5">@(Model.Apartment?.Type.ToString() ?? "-")</span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <small class="text-white-50 text-uppercase d-block fw-bold mb-1">Current Rent</small>
+                            <span class="fs-3 fw-bold text-warning">Rs. @Model.MonthlyRent.ToString("N0")</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white bg-opacity-10 rounded-3 p-3 mt-3 border border-white border-opacity-25">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2 fs-5"></i>
+                            <div>
+                                <span class="d-block fw-bold">Current Tenant</span>
+                                <small class="text-white-50">Lease is active</small>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

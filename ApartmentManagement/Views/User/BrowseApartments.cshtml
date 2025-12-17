@@ -1,0 +1,249 @@
+@model IEnumerable<ApartmentManagement.Models.Apartment>
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Browse Apartments";
+}
+
+<head>
+    <title>Browse Apartments</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Adjusted for Card Layout */
+        .img-box {
+            height: 250px; /* Fixed height for the image in the grid */
+            width: 100%;
+            background-color: #f1f5f9;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .listing-img {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease;
+        }
+
+        .listing-card {
+            transition: all 0.3s ease;
+            height: 100%; /* Ensures all cards in a row match height */
+            display: flex;
+            flex-direction: column;
+        }
+
+            .listing-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            }
+
+        .img-box:hover .listing-img {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+
+    <div class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200 py-3">
+        <div class="max-w-7xl mx-auto px-4">
+            <form method="get" asp-action="BrowseApartments" class="flex flex-wrap md:flex-nowrap gap-3 items-center justify-center md:justify-start">
+
+                <select name="type" class="w-full md:w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-700">
+                    <option value="">Type: All</option>
+                    @if (ViewBag.Types != null)
+                    {
+                        foreach (var t in (IEnumerable<ApartmentManagement.Models.ApartmentType>)ViewBag.Types)
+                        {
+                            var selected = Context.Request.Query["type"] == t.ToString() ? "selected" : "";
+                            <option value="@t" selected="@(selected == "selected")">@t</option>
+                        }
+                    }
+                </select>
+
+                <div class="flex gap-3 w-full md:w-auto flex-1">
+                    <input type="number" name="minRent" placeholder="Min Price" value="@Context.Request.Query["minRent"]" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="number" name="maxRent" placeholder="Max Price" value="@Context.Request.Query["maxRent"]" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="number" name="minSize" placeholder="Min SqFt" value="@Context.Request.Query["minSize"]" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+
+                <button type="submit" class="w-full md:w-auto bg-blue-600 text-white rounded-lg px-6 py-2 text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
+                    Search
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto p-4 pb-12">
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                @foreach (var item in Model)
+                {
+                    // =========================================================
+                    // 1. IMAGE PARSING LOGIC (Preserved from your code)
+                    // =========================================================
+                    List<string> photoList = new List<string>();
+                    string rawPhotos = item.Photos ?? "";
+
+                    try
+                    {
+                        if (string.IsNullOrWhiteSpace(rawPhotos)) { }
+                        else if (rawPhotos.Trim().StartsWith("["))
+                        {
+                            rawPhotos = rawPhotos.Replace("'", "\"");
+                            var parsed = JsonSerializer.Deserialize<List<string>>(rawPhotos);
+                            if (parsed != null && parsed.Count > 0) { photoList = parsed; }
+                        }
+                        else if (rawPhotos.Contains(","))
+                        {
+                            photoList = rawPhotos.Split(',').Select(p => p.Trim()).Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
+                        }
+                        else
+                        {
+                            var trimmed = rawPhotos.Trim();
+                            if (!string.IsNullOrWhiteSpace(trimmed)) { photoList.Add(trimmed); }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Photo parsing error: {ex.Message}");
+                        if (!string.IsNullOrWhiteSpace(rawPhotos)) { photoList.Add(rawPhotos); }
+                    }
+
+                    if (photoList.Count == 0 || string.IsNullOrEmpty(photoList[0]))
+                    {
+                        photoList = new List<string> { "https://placehold.co/600x400/e2e8f0/1e293b?text=No+Image" };
+                    }
+                    string jsonPhotos = JsonSerializer.Serialize(photoList);
+                    // =========================================================
+
+                    <div class="bg-white rounded-xl shadow-md listing-card overflow-hidden group">
+
+                        <div class="w-full img-box cursor-pointer slideshow-trigger relative"
+                             data-photos='@Html.Raw(jsonPhotos)'>
+
+                            <img src="@photoList[0]"
+                                 class="w-full h-full object-cover listing-img"
+                                 alt="Apartment Photo"
+                                 onerror="this.onerror=null;this.src='https://placehold.co/600x400/fee2e2/991b1b?text=Image+Not+Found';">
+
+                            <span class="absolute top-3 left-3 bg-blue-600 text-white px-3 py-1 text-xs font-bold rounded-md shadow uppercase tracking-wide">
+                                @item.Status
+                            </span>
+
+                            <span class="absolute bottom-3 right-3 bg-black bg-opacity-60 text-white px-2 py-1 text-xs rounded-md font-medium">
+                                <i class="fas fa-camera mr-1"></i> @photoList.Count
+                            </span>
+                        </div>
+
+                        <div class="p-5 flex flex-col flex-grow justify-between">
+                            <div>
+                                <div class="flex justify-between items-start mb-2">
+                                    <h2 class="text-xl font-bold text-blue-700">
+                                        <span class="text-xs font-normal text-gray-500 mr-1">PKR</span>@item.BaseRentRate.ToString("#,##0")
+                                    </h2>
+                                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold px-2 py-1 rounded-md">
+                                        @item.Type
+                                    </span>
+                                </div>
+
+                                <p class="text-gray-600 font-semibold text-sm mb-3 flex items-center">
+                                    <i class="fas fa-map-marker-alt text-blue-500 mr-2"></i>
+                                    <span class="truncate">@(item.Building?.Name ?? "Lahore, Pakistan")</span>
+                                </p>
+
+                                <div class="flex items-center justify-between text-gray-600 text-xs mb-4 border-t border-b border-gray-100 py-2">
+                                    <span><i class="fas fa-ruler-combined text-blue-500 mr-1"></i> @item.Size sqft</span>
+                                    <span><i class="fas fa-layer-group text-blue-500 mr-1"></i> Flr @item.FloorNumber</span>
+                                    <span><i class="fas fa-door-open text-blue-500 mr-1"></i> No. @item.ApartmentNumber</span>
+                                </div>
+
+                                <p class="text-gray-500 text-sm line-clamp-2 leading-relaxed mb-4">
+                                    @(item.Description ?? "A premium apartment offering comfort and security.")
+                                </p>
+                            </div>
+
+                            <div class="mt-auto">
+                                <a href="@Url.Action("ApartmentDetails", new { id = item.Id })"
+                                   class="block w-full bg-white border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white text-center py-2 rounded-lg font-semibold text-sm transition-colors duration-300">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-16 bg-white rounded-xl shadow-sm">
+                <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-search text-blue-400 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-700">No apartments found</h3>
+                <p class="text-gray-500 text-sm mt-1">Adjust your filters to find what you're looking for.</p>
+                <a href="@Url.Action("BrowseApartments")" class="text-blue-600 text-sm font-bold hover:underline mt-4 inline-block">Clear Filters</a>
+            </div>
+        }
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const containers = document.querySelectorAll(".slideshow-trigger");
+
+            containers.forEach(container => {
+                const imgTag = container.querySelector(".listing-img");
+                const rawData = container.getAttribute("data-photos");
+
+                if (!rawData || !imgTag) return;
+
+                try {
+                    const photos = JSON.parse(rawData);
+
+                    if (photos.length > 1) {
+                        let interval;
+                        let index = 0;
+
+                        container.addEventListener("mouseenter", () => {
+                            // Preload images
+                            photos.forEach(src => {
+                                const i = new Image();
+                                i.src = src;
+                            });
+
+                            clearInterval(interval);
+                            interval = setInterval(() => {
+                                index = (index + 1) % photos.length;
+                                imgTag.style.opacity = '0';
+
+                                setTimeout(() => {
+                                    imgTag.src = photos[index];
+                                    imgTag.style.opacity = '1';
+                                }, 150);
+                            }, 800);
+                        });
+
+                        container.addEventListener("mouseleave", () => {
+                            clearInterval(interval);
+                            index = 0;
+                            imgTag.style.opacity = '0';
+
+                            setTimeout(() => {
+                                imgTag.src = photos[0];
+                                imgTag.style.opacity = '1';
+                            }, 150);
+                        });
+                    }
+                } catch (e) {
+                    console.error("JSON Error:", e);
+                }
+            });
+        });
+    </script>
+</body>

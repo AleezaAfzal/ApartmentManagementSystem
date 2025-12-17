@@ -1,0 +1,165 @@
+﻿@using ApartmentManagement.Models
+@model IEnumerable<ApartmentManagement.Models.Tenant>
+
+@{
+    ViewData["Title"] = "Tenants Directory";
+}
+
+<section id="tenants-directory" class="section">
+    <div class="container" data-aos="fade-up">
+
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold text-dark">Tenants Directory</h2>
+                <p class="text-muted">Manage active lease agreements and tenant history.</p>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4 bg-light">
+            <div class="card-body p-4">
+                <form asp-action="Tenants" method="get" class="row g-3 align-items-end">
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small text-uppercase text-muted">
+                            <i class="bi bi-building me-1"></i> Apartment Type
+                        </label>
+                        <select name="searchType" class="form-select" asp-items="Html.GetEnumSelectList<ApartmentType>()">
+                            <option value="">-- All Types --</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small text-uppercase text-muted">
+                            <i class="bi bi-toggle-on me-1"></i> Lease Status
+                        </label>
+                        <select name="searchStatus" class="form-select">
+                            <option value="">-- All Statuses --</option>
+                            <option value="Active">Active (Occupied)</option>
+                            <option value="Expired">Expired (Past)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger w-100 fw-bold text-white">
+                                <i class="bi bi-search me-2"></i> Filter
+                            </button>
+                            <a asp-action="Tenants" class="btn btn-outline-secondary w-100 fw-bold">
+                                Reset
+                            </a>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="table-responsive">
+                <table class="table mb-0 align-middle table-hover">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Tenant Details</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Contact Info</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Property</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Financials</th>
+                            <th class="py-3 px-4 text-uppercase text-secondary small fw-bold">Status</th>
+                            <th class="py-3 px-4 text-end text-uppercase text-secondary small fw-bold" style="min-width: 150px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white">
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var tenant in Model)
+                            {
+                                bool isActive = tenant.ContractEndDate >= DateTime.Today;
+                                string statusBadge = isActive ? "bg-success" : "bg-danger";
+                                string statusIcon = isActive ? "bi-check-circle-fill" : "bi-x-circle-fill";
+                                string statusLabel = isActive ? "Active" : "Expired";
+
+                                <tr class="border-bottom">
+                                    <td class="px-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm bg-light text-primary fw-bold"
+                                                 style="width: 45px; height: 45px; font-size: 1.2rem;">
+                                                @(tenant.User?.FullName?.Substring(0, 1) ?? "T")
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark">@tenant.User?.FullName</div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <div class="small text-dark mb-1">
+                                            <i class="bi bi-telephone me-2 text-muted"></i> @tenant.User?.PhoneNumber
+                                        </div>
+                                        <div class="small text-muted">
+                                            <i class="bi bi-envelope me-2 text-muted"></i> @tenant.User?.Email
+                                        </div>
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <div class="fw-bold text-dark">Unit @tenant.Apartment?.ApartmentNumber</div>
+                                        <div class="badge bg-light text-dark border fw-normal">@tenant.Apartment?.Type</div>
+                                        <span class="small text-muted ms-1">@tenant.Apartment?.Building?.Name</span>
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <div class="fw-bold text-success">@tenant.MonthlyRent.ToString("C0")</div>
+                                        <div class="small text-muted">per month</div>
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <span class="badge rounded-pill @statusBadge bg-opacity-75">
+                                            <i class="bi @statusIcon me-1"></i> @statusLabel
+                                        </span>
+                                        <div class="small text-muted mt-1">Ends: @tenant.ContractEndDate.ToString("MMM dd, yy")</div>
+                                    </td>
+
+                                    <td class="px-4 py-3 text-end">
+                                        <div class="btn-group shadow-sm" role="group">
+
+                                            <a asp-action="TenantDetails" asp-route-id="@tenant.Id"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+
+                                            <a asp-action="Edit" asp-route-id="@tenant.Id"
+                                               class="btn btn-sm btn-outline-warning text-dark"
+                                               title="Edit">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+
+                                            <form asp-action="Delete" asp-route-id="@tenant.Id" method="post" style="display:inline-block; margin:0;">
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        style="border-top-left-radius: 0; border-bottom-left-radius: 0;"
+                                                        title="Remove"
+                                                        onclick="return confirm('Are you sure you want to remove this tenant?');">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="text-muted mb-3"><i class="bi bi-search" style="font-size: 3rem;"></i></div>
+                                    <h5 class="text-muted">No tenants found</h5>
+                                    <p class="small text-muted">Try adjusting your filters or resetting the search.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</section>

@@ -1,0 +1,114 @@
+@model ApartmentManagement.Models.Complaint
+
+@{
+    // --- LOGIC TO DETERMINE MODE (Create vs Edit) ---
+    bool isEdit = Model != null && Model.Id > 0;
+
+    ViewData["Title"] = isEdit ? "Edit Complaint" : "Submit Complaint";
+
+    // Dynamic Text
+    string headingText = isEdit ? "Edit Complaint" : "Submit Complaint";
+    string cardHeaderClass = isEdit ? "bg-warning text-dark" : "bg-primary text-white";
+    string buttonText = isEdit ? "Update Complaint" : "Submit Complaint";
+    string buttonClass = isEdit ? "btn-warning" : "btn-primary";
+    string formAction = isEdit ? "Edit" : "SubmitComplaint";
+
+    // Icon logic
+    string icon = isEdit ? "bi-pencil-square" : "bi-exclamation-triangle-fill";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header @cardHeaderClass">
+                    <h3 class="card-title mb-0">
+                        <i class="bi @icon"></i> @headingText
+                    </h3>
+                </div>
+                <div class="card-body">
+
+                    <form asp-action="@formAction" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="ImagePath" />
+                        <input type="hidden" asp-for="CreatedAt" />
+                        <input type="hidden" asp-for="TenantId" />
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Title" class="form-control" placeholder="Issue Title" />
+                            <label asp-for="Title"></label>
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea asp-for="Description" class="form-control" placeholder="Description" style="height: 150px;"></textarea>
+                            <label asp-for="Description"></label>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="ComplaintDate" class="control-label fw-bold">Date of Occurrence</label>
+                            <input asp-for="ComplaintDate" class="form-control" type="date"
+                                   value="@Model.ComplaintDate.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="ComplaintDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label class="control-label fw-bold">Photo Evidence</label>
+
+                            @if (isEdit && !string.IsNullOrEmpty(Model.ImagePath))
+                            {
+                                <div class="mb-2 p-2 border rounded bg-light">
+                                    <p class="small text-muted mb-1">Current Image:</p>
+                                    <img src="@Model.ImagePath" style="height: 100px; width: auto;" class="rounded border" />
+                                </div>
+                                <div class="alert alert-light border small">
+                                    <i class="bi bi-info-circle"></i> Uploading a new photo will replace the current one.
+                                </div>
+                            }
+
+                            <label class="small text-muted">@(isEdit ? "Change Photo (Optional)" : "Attach Photo (Optional)")</label>
+                            <input type="file" name="image" class="form-control mb-2" accept="image/*" onchange="previewImage(this)" />
+
+                            <div id="imagePreviewContainer" class="d-none text-center p-2 border rounded bg-light">
+                                <p class="text-muted small mb-1">New Selection Preview:</p>
+                                <img id="imagePreview" src="#" alt="Image Preview" class="img-fluid img-thumbnail" style="max-height: 200px;" />
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Complaints" class="btn btn-outline-secondary me-md-2">Cancel</a>
+
+                            <button type="submit" class="btn @buttonClass px-4">@buttonText</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function previewImage(input) {
+            var previewContainer = document.getElementById('imagePreviewContainer');
+            var previewImage = document.getElementById('imagePreview');
+
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.classList.remove('d-none');
+                }
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                previewContainer.classList.add('d-none');
+            }
+        }
+    </script>
+}
