@@ -54,7 +54,7 @@ namespace ApartmentManagement.ViewModels
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            // If registering as Owner, CNIC, CNICDocument, BuildingName and BuildingAddress are required
+            
             if (IsOwner)
             {
                 if (string.IsNullOrWhiteSpace(CNIC))
@@ -78,7 +78,7 @@ namespace ApartmentManagement.ViewModels
                 }
             }
 
-            // If BuildingName provided (non-owner scenario), ensure BuildingAddress present (optional business rule)
+           
             if (!IsOwner && !string.IsNullOrWhiteSpace(BuildingName) && string.IsNullOrWhiteSpace(BuildingAddress))
             {
                 yield return new ValidationResult("Building address is required when building name is provided.", new[] { nameof(BuildingAddress) });

@@ -25,18 +25,14 @@ namespace ApartmentManagement.Controllers
             _hostEnvironment = hostEnvironment;
         }
 
-        // ==========================================
-        // 1. DASHBOARD & PAYMENTS
-        // ==========================================
-
         public async Task<IActionResult> Dashboard()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound();
 
             var tenant = await _context.Tenants
-                .Include(t => t.Apartment)
-                .ThenInclude(a => a.Building)
+                .Include(t => t.Apartment!)
+                    .ThenInclude(a => a.Building)
                 .FirstOrDefaultAsync(t => t.UserId == user.Id);
 
             if (tenant == null) return NotFound();
@@ -71,7 +67,10 @@ namespace ApartmentManagement.Controllers
         public async Task<IActionResult> Payments(string? searchStatus, DateTime? searchMonth, PaymentType? searchType)
         {
             var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId)) return NotFound();
+
             var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.UserId == userId);
+            if (tenant == null) return NotFound();
 
             var query = _context.Payments
                 .Where(p => p.TenantId == tenant.Id)
@@ -126,7 +125,7 @@ namespace ApartmentManagement.Controllers
 
             if (paymentReceipt != null && paymentReceipt.Length > 0)
             {
-                var uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "uploads", "receipts");
+                var uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath ?? string.Empty, "uploads", "receipts");
                 if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
 
                 var uniqueFileName = Guid.NewGuid().ToString() + "_" + paymentReceipt.FileName;
@@ -150,10 +149,6 @@ namespace ApartmentManagement.Controllers
             return RedirectToAction(nameof(Payments));
         }
 
-        // ==========================================
-        // 2. COMPLAINT MANAGEMENT
-        // ==========================================
-
         [HttpGet]
         public async Task<IActionResult> Complaints()
         {
@@ -171,15 +166,16 @@ namespace ApartmentManagement.Controllers
             return View(complaints);
         }
 
-        // GET: Submit Complaint (Handles BOTH New and Edit)
         [HttpGet]
         public async Task<IActionResult> SubmitComplaint(int? id)
         {
-            // Case 1: Editing an existing complaint
             if (id.HasValue)
             {
                 var user = await _userManager.GetUserAsync(User);
+                if (user == null) return NotFound();
+
                 var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.UserId == user.Id);
+                if (tenant == null) return NotFound();
 
                 var complaint = await _context.Complaints
                     .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == tenant.Id);
@@ -188,22 +184,21 @@ namespace ApartmentManagement.Controllers
                 return View(complaint);
             }
 
-            // Case 2: Creating a new complaint
             return View(new Complaint { ComplaintDate = DateTime.Now });
         }
 
-        // POST: Submit Complaint (Handles Insert and Update)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SubmitComplaint(Complaint complaint, IFormFile? image)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound();
+
             var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.UserId == user.Id);
             if (tenant == null) return NotFound();
 
             if (ModelState.IsValid)
             {
-                // Handle Image Upload
                 if (image != null)
                 {
                     complaint.ImagePath = await UploadFile(image, "complaints");
@@ -211,7 +206,6 @@ namespace ApartmentManagement.Controllers
 
                 if (complaint.Id > 0)
                 {
-                    // --- UPDATE ---
                     var existingComplaint = await _context.Complaints
                         .FirstOrDefaultAsync(c => c.Id == complaint.Id && c.TenantId == tenant.Id);
 
@@ -221,7 +215,6 @@ namespace ApartmentManagement.Controllers
                     existingComplaint.Description = complaint.Description;
                     existingComplaint.ComplaintDate = complaint.ComplaintDate;
 
-                    // Only update image path if a new one was uploaded
                     if (image != null)
                     {
                         existingComplaint.ImagePath = complaint.ImagePath;
@@ -232,7 +225,6 @@ namespace ApartmentManagement.Controllers
                 }
                 else
                 {
-                    // --- INSERT ---
                     complaint.TenantId = tenant.Id;
                     complaint.Status = ComplaintStatus.Pending;
                     complaint.CreatedAt = DateTime.Now;
@@ -247,21 +239,21 @@ namespace ApartmentManagement.Controllers
             return View(complaint);
         }
 
-        // This method handles the "Edit" action from the table button if mapped explicitly
-        // It redirects to the unified SubmitComplaint logic
         [HttpGet]
         public IActionResult Edit(int? id)
         {
             return RedirectToAction(nameof(SubmitComplaint), new { id = id });
         }
 
-        // DELETE Complaint
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound();
+
             var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.UserId == user.Id);
+            if (tenant == null) return NotFound();
 
             var complaint = await _context.Complaints
                 .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == tenant.Id);
@@ -279,10 +271,6 @@ namespace ApartmentManagement.Controllers
 
             return RedirectToAction(nameof(Complaints));
         }
-
-        // ==========================================
-        // 3. VENUE BOOKINGS
-        // ==========================================
 
         [HttpGet]
         public async Task<IActionResult> VenueBookings()
@@ -321,7 +309,6 @@ namespace ApartmentManagement.Controllers
 
             if (ModelState.IsValid)
             {
-                // Conflict Check
                 var conflictingBookings = await _context.VenueBookings
                     .Where(v => v.VenueType == booking.VenueType
                         && v.BookingDate == booking.BookingDate
@@ -358,10 +345,6 @@ namespace ApartmentManagement.Controllers
             return View(booking);
         }
 
-        // ==========================================
-        // 4. REVIEWS (CLEANED & FIXED)
-        // ==========================================
-
         [HttpGet]
         public async Task<IActionResult> Reviews()
         {
@@ -372,8 +355,8 @@ namespace ApartmentManagement.Controllers
             if (tenant == null) return NotFound();
 
             var reviews = await _context.Reviews
-                .Include(r => r.Apartment)
-                .ThenInclude(a => a.Building)
+                .Include(r => r.Apartment!)
+                    .ThenInclude(a => a.Building)
                 .Where(r => r.TenantId == tenant.Id)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
@@ -381,14 +364,15 @@ namespace ApartmentManagement.Controllers
             return View(reviews);
         }
 
-        // GET: Submit Review (Handles BOTH New and Edit)
         [HttpGet]
         public async Task<IActionResult> SubmitReview(int? id)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound();
+
             var tenant = await _context.Tenants
-                .Include(t => t.Apartment)
-                .ThenInclude(a => a.Building)
+                .Include(t => t.Apartment!)
+                    .ThenInclude(a => a.Building)
                 .FirstOrDefaultAsync(t => t.UserId == user.Id);
 
             if (tenant == null || tenant.Apartment == null)
@@ -399,7 +383,6 @@ namespace ApartmentManagement.Controllers
 
             ViewBag.Apartment = tenant.Apartment;
 
-            // CASE 1: EDIT (ID Provided)
             if (id.HasValue)
             {
                 var existingReview = await _context.Reviews
@@ -409,7 +392,6 @@ namespace ApartmentManagement.Controllers
                 return View(existingReview);
             }
 
-            // CASE 2: NEW (Check duplicates)
             var previousReview = await _context.Reviews
                 .FirstOrDefaultAsync(r => r.TenantId == tenant.Id && r.ApartmentId == tenant.ApartmentId);
 
@@ -422,12 +404,13 @@ namespace ApartmentManagement.Controllers
             return View(new Review { ApartmentId = tenant.ApartmentId });
         }
 
-        // POST: Submit Review (Handles Insert and Update)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SubmitReview(Review review)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound();
+
             var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.UserId == user.Id);
             if (tenant == null) return NotFound();
 
@@ -435,7 +418,6 @@ namespace ApartmentManagement.Controllers
             {
                 if (review.Id > 0)
                 {
-                    // --- UPDATE ---
                     var existingReview = await _context.Reviews
                         .FirstOrDefaultAsync(r => r.Id == review.Id && r.TenantId == tenant.Id);
 
@@ -450,7 +432,6 @@ namespace ApartmentManagement.Controllers
                 }
                 else
                 {
-                    // --- INSERT ---
                     review.TenantId = tenant.Id;
                     review.CreatedAt = DateTime.Now;
                     _context.Reviews.Add(review);
@@ -461,7 +442,6 @@ namespace ApartmentManagement.Controllers
                 return RedirectToAction(nameof(Reviews));
             }
 
-            // Reload View Data on Error
             var apartment = await _context.Apartments
                 .Include(a => a.Building)
                 .FirstOrDefaultAsync(a => a.Id == review.ApartmentId);
@@ -470,13 +450,15 @@ namespace ApartmentManagement.Controllers
             return View(review);
         }
 
-        // POST: Delete Review
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteReview(int id)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound();
+
             var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.UserId == user.Id);
+            if (tenant == null) return NotFound();
 
             var review = await _context.Reviews
                 .FirstOrDefaultAsync(r => r.Id == id && r.TenantId == tenant.Id);
@@ -491,12 +473,9 @@ namespace ApartmentManagement.Controllers
             return RedirectToAction(nameof(Reviews));
         }
 
-        // ==========================================
-        // HELPERS
-        // ==========================================
         private async Task<string> UploadFile(IFormFile file, string folderName)
         {
-            var uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "uploads", folderName);
+            var uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath ?? string.Empty, "uploads", folderName);
             if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
 
             var uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
@@ -509,11 +488,6 @@ namespace ApartmentManagement.Controllers
             return "/uploads/" + folderName + "/" + uniqueFileName;
         }
 
-        // ==========================================
-        // Profile
-        // ==========================================
-        // GET: View/Edit Profile
-        // GET: View/Edit Profile
         [HttpGet]
         public async Task<IActionResult> Profile()
         {
@@ -521,9 +495,9 @@ namespace ApartmentManagement.Controllers
             if (user == null) return NotFound();
 
             var tenant = await _context.Tenants
-                .Include(t => t.User) // Load User details (Name, Email, Phone)
-                .Include(t => t.Apartment) // Load Apartment
-                    .ThenInclude(a => a.Building) // CRITICAL: Load Building for the Name/Location
+                .Include(t => t.User)
+                .Include(t => t.Apartment!)
+                    .ThenInclude(a => a.Building)
                 .FirstOrDefaultAsync(t => t.UserId == user.Id);
 
             if (tenant == null) return NotFound();
@@ -531,7 +505,6 @@ namespace ApartmentManagement.Controllers
             return View(tenant);
         }
 
-        // POST: Update Profile
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Profile(Tenant model, string FullName, string PhoneNumber)
@@ -539,13 +512,10 @@ namespace ApartmentManagement.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound();
 
-            // 1. Update Identity User (Personal Info)
             user.FullName = FullName;
             user.PhoneNumber = PhoneNumber;
             await _userManager.UpdateAsync(user);
 
-            // 2. Refresh the data to show the view again with all apartment details
-            // (We redirect to GET Profile to reload the 'Includes' cleanly)
             TempData["Success"] = "Profile updated successfully!";
             return RedirectToAction(nameof(Profile));
         }

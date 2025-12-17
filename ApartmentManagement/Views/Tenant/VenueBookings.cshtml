@@ -19,7 +19,7 @@
         <div class="card-body p-0">
             @if (!Model.Any())
             {
-                // Empty State
+                
                 <div class="text-center py-5">
                     <div class="mb-3">
                         <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
@@ -31,7 +31,7 @@
             }
             else
             {
-                // Table Design
+                
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="bg-light text-secondary text-uppercase small">
@@ -95,7 +95,7 @@
                                                 ApartmentManagement.Models.VenueBookingStatus.Approved => "success",
                                                 ApartmentManagement.Models.VenueBookingStatus.Rejected => "danger",
                                                 ApartmentManagement.Models.VenueBookingStatus.Completed => "secondary",
-                                                _ => "warning" // Pending
+                                                _ => "warning" 
                                             };
 
                                             var statusIcon = booking.Status switch

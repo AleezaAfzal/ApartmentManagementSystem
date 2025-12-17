@@ -10,12 +10,12 @@ namespace ApartmentManagement.ViewModels
         [Display(Name = "Apartment")]
         public int ApartmentId { get; set; }
 
-        // Hidden field to store the actual TenantId found via JS/Controller logic
+        
         [Required]
         public int TenantId { get; set; }
 
         [Display(Name = "Tenant Name")]
-        public string? TenantName { get; set; } // Read-only for display
+        public string? TenantName { get; set; } 
 
         [Required]
         [DataType(DataType.Date)]

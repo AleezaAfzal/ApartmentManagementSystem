@@ -29,17 +29,15 @@ namespace ApartmentManagement.Controllers
             return View(apartments);
         }
 
-        // ==========================================
-        // ADD THIS NEW METHOD FOR THE PUBLIC REVIEWS PAGE
-        // ==========================================
+
         public async Task<IActionResult> Reviews()
         {
             var reviews = await _context.Reviews
                 .Include(r => r.Tenant)
-                    .ThenInclude(t => t.User) // Get User to show Name (e.g. "Simran Butt")
+                    .ThenInclude(t => t.User) 
                 .Include(r => r.Apartment)
-                    .ThenInclude(a => a.Building) // Get Building Name
-                .OrderByDescending(r => r.CreatedAt) // Show newest first
+                    .ThenInclude(a => a.Building) 
+                .OrderByDescending(r => r.CreatedAt) 
                 .ToListAsync();
 
             return View(reviews);

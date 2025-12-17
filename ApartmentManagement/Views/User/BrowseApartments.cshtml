@@ -15,9 +15,9 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* Adjusted for Card Layout */
+       
         .img-box {
-            height: 250px; /* Fixed height for the image in the grid */
+            height: 250px; 
             width: 100%;
             background-color: #f1f5f9;
             position: relative;
@@ -30,7 +30,7 @@
 
         .listing-card {
             transition: all 0.3s ease;
-            height: 100%; /* Ensures all cards in a row match height */
+            height: 100%; 
             display: flex;
             flex-direction: column;
         }
@@ -85,9 +85,7 @@
 
                 @foreach (var item in Model)
                 {
-                    // =========================================================
-                    // 1. IMAGE PARSING LOGIC (Preserved from your code)
-                    // =========================================================
+                    
                     List<string> photoList = new List<string>();
                     string rawPhotos = item.Photos ?? "";
 
@@ -121,7 +119,7 @@
                         photoList = new List<string> { "https://placehold.co/600x400/e2e8f0/1e293b?text=No+Image" };
                     }
                     string jsonPhotos = JsonSerializer.Serialize(photoList);
-                    // =========================================================
+                    
 
                     <div class="bg-white rounded-xl shadow-md listing-card overflow-hidden group">
 
@@ -211,7 +209,7 @@
                         let index = 0;
 
                         container.addEventListener("mouseenter", () => {
-                            // Preload images
+                            
                             photos.forEach(src => {
                                 const i = new Image();
                                 i.src = src;

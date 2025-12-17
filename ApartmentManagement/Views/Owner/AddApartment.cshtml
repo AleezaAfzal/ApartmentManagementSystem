@@ -17,7 +17,7 @@
     .btn-light {
         text-decoration: none !important;
     }
-    /* --- PROFESSIONAL THEME VARIABLES --- */
+
     :root {
         --accent-color: #264653;
         --heading-color: #111827;
@@ -34,7 +34,7 @@
         color: #374151;
     }
 
-    /* --- LAYOUT & CARD --- */
+
     .form-container {
         max-width: 900px;
         margin: 40px auto;
@@ -55,7 +55,6 @@
         border-bottom: 1px solid #f3f4f6;
     }
 
-    /* --- SECTION HEADERS --- */
     .section-title {
         font-family: var(--font-heading);
         font-size: 1rem;
@@ -79,7 +78,7 @@
             font-size: 0.9rem;
         }
 
-    /* --- SEAMLESS INPUT GROUPS --- */
+
     .input-group-seamless {
         background-color: var(--input-bg);
         border: 1px solid var(--input-border);
@@ -124,7 +123,7 @@
         margin-left: 2px;
     }
 
-    /* --- PRO UPLOAD ZONE --- */
+
     .upload-area {
         border: 2px dashed #cbd5e1;
         border-radius: 12px;
@@ -153,7 +152,7 @@
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
 
-    /* --- FOOTER ACTIONS --- */
+
     .form-actions {
         background: #f9fafb;
         padding: 20px 40px;
@@ -180,7 +179,6 @@
             box-shadow: 0 4px 12px rgba(38, 70, 83, 0.25);
         }
 
-    /* Preview Thumbs */
     .preview-thumb {
         width: 100%;
         height: 80px;
@@ -353,7 +351,6 @@
             const photoError = document.getElementById('photo-error');
             const form = document.getElementById('uploadForm');
 
-            // --- Drag & Drop Visuals ---
             dropZone.addEventListener('click', () => fileInput.click());
 
             ['dragenter', 'dragover'].forEach(evt => {
@@ -363,7 +360,6 @@
                 dropZone.addEventListener(evt, (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); });
             });
 
-            // --- Handle Files ---
             dropZone.addEventListener('drop', (e) => {
                 const newFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
                 addFiles(newFiles);
@@ -377,41 +373,31 @@
             function addFiles(newFiles) {
                 const dt = new DataTransfer();
 
-                // 1. Merge existing files with the new files
                 const allFiles = [...Array.from(fileInput.files), ...newFiles];
 
-                // 2. Map to track unique file names
                 const uniqueMap = new Map();
 
                 allFiles.forEach(file => {
-                    // Get the name without extension (e.g., "living_room" from "living_room.png")
                     const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
 
-                    // If this is the first time we see this image name, add it
                     if (!uniqueMap.has(baseName)) {
                         uniqueMap.set(baseName, file);
                     } else {
-                        // COLLISION: We already have a file with this name.
-                        // Check if the NEW one is better (e.g., prefer PNG/JPG over AVIF)
                         const currentFile = uniqueMap.get(baseName);
 
-                        // Check extensions
                         const isCurrentBad = currentFile.name.toLowerCase().endsWith('.avif') || currentFile.name.toLowerCase().endsWith('.heic');
                         const isNewBad = file.name.toLowerCase().endsWith('.avif') || file.name.toLowerCase().endsWith('.heic');
 
-                        // If the one we have is AVIF, but the new one is Standard (PNG/JPG), swap it!
                         if (isCurrentBad && !isNewBad) {
                             uniqueMap.set(baseName, file);
                         }
                     }
                 });
 
-                // 3. Add only the unique/best files to the DataTransfer object
                 uniqueMap.forEach(file => {
                     dt.items.add(file);
                 });
 
-                // 4. Update the input and the preview
                 fileInput.files = dt.files;
                 updatePreview();
             }
@@ -437,7 +423,6 @@
                 });
             }
 
-            // Expose removePhoto to global scope for onclick attribute
             window.removePhoto = function(index) {
                 const dt = new DataTransfer();
                 const files = fileInput.files;
@@ -450,12 +435,10 @@
                 updatePreview();
             };
 
-            // --- Form Validation ---
             form.addEventListener('submit', (e) => {
                 if (fileInput.files.length < 1) {
                     e.preventDefault();
                     photoError.classList.remove('d-none');
-                    // Scroll to error
                     photoError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else {
                     photoError.classList.add('d-none');

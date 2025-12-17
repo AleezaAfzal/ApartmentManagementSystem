@@ -1,7 +1,7 @@
 @{
     ViewData["Title"] = "Owner Dashboard";
 
-    // Casting viewbag data to lists for easier handling
+   
     var visits = ViewBag.PendingVisits as List<ApartmentManagement.Models.VisitRequest>;
     var complaints = ViewBag.PendingComplaints as List<ApartmentManagement.Models.Complaint>;
     var bookings = ViewBag.PendingVenueBookings as List<ApartmentManagement.Models.VenueBooking>;

@@ -36,7 +36,6 @@
                         {
                             foreach (var booking in Model)
                             {
-                                // --- Presentation Logic ---
                                 string badgeClass = booking.Status switch
                                 {
                                     VenueBookingStatus.Pending => "bg-warning text-dark bg-opacity-25",
@@ -45,7 +44,7 @@
                                     _ => "bg-secondary"
                                 };
 
-                                // Calculate End Time (Assuming default 3 hours if Duration not in model)
+                                
                                 DateTime start = DateTime.Today.Add(booking.BookingTime);
                                 DateTime end = start.AddHours(3);
                                 string timeRange = $"{start:hh:mm tt} - {end:hh:mm tt}";
@@ -108,72 +107,6 @@
                                         }
                                     </td>
                                 </tr>
-
-                                <div class="modal fade" id="approveModal_@booking.Id" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-success text-white">
-                                                <h5 class="modal-title fw-bold"><i class="bi bi-check-circle me-2"></i>Approve Booking</h5>
-                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <form asp-action="ApproveVenueBooking" method="post">
-                                                <div class="modal-body p-4">
-                                                    <input type="hidden" name="id" value="@booking.Id" />
-
-                                                    <div class="alert alert-light border mb-3">
-                                                        <strong>Note to Tenants:</strong> A notification will be sent blocking the venue
-                                                        from <strong>@start.AddHours(-1).ToString("hh:mm tt")</strong> to
-                                                        <strong>@end.AddHours(1).ToString("hh:mm tt")</strong> (1 hour buffer).
-                                                    </div>
-
-                                                    <div class="form-check form-switch mb-3 p-3 bg-light rounded border">
-                                                        <input class="form-check-input" type="checkbox" name="cleaningScheduled" value="true" id="cleaning_@booking.Id" checked>
-                                                        <label class="form-check-label fw-bold" for="cleaning_@booking.Id">
-                                                            Schedule Cleaning Service?
-                                                        </label>
-                                                        <div class="small text-muted mt-1">Cleaning fee will be added to tenant's next bill if applicable.</div>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label class="form-label fw-bold small text-muted">Admin Notes (Optional)</label>
-                                                        <textarea name="adminNotes" class="form-control" rows="2"></textarea>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer border-0">
-                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                                                    <button type="submit" class="btn btn-success fw-bold">Confirm Approval</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="modal fade" id="rejectModal_@booking.Id" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-danger text-white">
-                                                <h5 class="modal-title fw-bold"><i class="bi bi-x-circle me-2"></i>Reject Booking</h5>
-                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <form asp-action="RejectVenueBooking" method="post">
-                                                <div class="modal-body p-4">
-                                                    <input type="hidden" name="id" value="@booking.Id" />
-
-                                                    <p class="text-muted mb-3">Are you sure you want to reject this request for <strong>@booking.VenueType</strong>?</p>
-
-                                                    <div class="mb-3">
-                                                        <label class="form-label fw-bold small text-muted">Reason for Rejection (Required)</label>
-                                                        <textarea name="adminNotes" class="form-control" rows="3" required placeholder="e.g., Venue under maintenance..."></textarea>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer border-0">
-                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                                                    <button type="submit" class="btn btn-danger fw-bold">Reject Request</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
                             }
                         }
                         else

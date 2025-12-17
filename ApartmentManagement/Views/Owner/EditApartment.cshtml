@@ -26,7 +26,7 @@
         color: #374151;
     }
 
-    /* FIX: Remove Underlines */
+    
     a, .btn-light {
         text-decoration: none !important;
     }
@@ -359,7 +359,7 @@
     <script>
         AOS.init();
 
-        // --- 1. REMOVE EXISTING PHOTOS ---
+        
         function removeExistingPhoto(elementId) {
             const element = document.getElementById(elementId);
             if(element) {
@@ -375,7 +375,7 @@
             const photoError = document.getElementById('photo-error');
             const form = document.getElementById('uploadForm');
 
-            // --- 2. DRAG & DROP VISUALS ---
+            
             dropZone.addEventListener('click', () => fileInput.click());
 
             ['dragenter', 'dragover'].forEach(evt => {
@@ -385,7 +385,7 @@
                 dropZone.addEventListener(evt, (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); });
             });
 
-            // --- 3. HANDLE NEW FILES ---
+            
             dropZone.addEventListener('drop', (e) => {
                 const newFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
                 addFiles(newFiles);
@@ -401,7 +401,7 @@
                 const allFiles = [...Array.from(fileInput.files), ...newFiles];
                 const uniqueMap = new Map();
 
-                // Deduplicate logic
+                
                 allFiles.forEach(file => {
                     const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
                     if (!uniqueMap.has(baseName)) {
@@ -449,7 +449,7 @@
                 updatePreview();
             };
 
-            // --- 4. VALIDATE TOTAL PHOTO COUNT ---
+            
             form.addEventListener('submit', (e) => {
                 const existingCount = document.querySelectorAll('.keep-photo-input').length;
                 const newCount = fileInput.files.length;

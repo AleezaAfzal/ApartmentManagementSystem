@@ -6,9 +6,7 @@
 }
 
 <style>
-    /* We use the variables defined in main.css so this page
-           perfectly matches your global theme.
-        */
+    
     .login-section {
         background: url('https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80') center center;
         background-size: cover;
@@ -21,12 +19,12 @@
     .login-overlay {
         position: absolute;
         inset: 0;
-        background-color: rgba(0, 0, 0, 0.6); /* Darker overlay for better text contrast */
+        background-color: rgba(0, 0, 0, 0.6); 
         backdrop-filter: blur(2px);
     }
 
     .login-card {
-        /* Using white with slight transparency for that "Luxury" feel */
+        
         background: rgba(255, 255, 255, 0.92);
         backdrop-filter: blur(15px);
         border: 1px solid rgba(255, 255, 255, 0.5);
@@ -34,7 +32,7 @@
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
     }
 
-    /* Typography matches main.css */
+   
     .login-title {
         font-family: var(--heading-font, "Raleway", sans-serif);
         color: var(--heading-color, #111827);
@@ -45,7 +43,7 @@
         color: var(--default-color, #4b5563);
     }
 
-    /* Floating labels styling */
+    
     .form-floating > label {
         color: var(--default-color, #4b5563);
         opacity: 0.8;
@@ -53,13 +51,13 @@
 
     .form-control:focus {
         border-color: var(--accent-color, #2eca6a);
-        box-shadow: 0 0 0 0.25rem rgba(46, 202, 106, 0.25); /* Fallback green shadow */
+        box-shadow: 0 0 0 0.25rem rgba(46, 202, 106, 0.25); 
     }
 
-    /* Theme Button */
+   
     .btn-theme {
         background-color: var(--accent-color, #2eca6a);
-        color: #ffffff; /* Always white text on accent button */
+        color: #ffffff; 
         font-family: var(--heading-font, "Raleway", sans-serif);
         font-weight: 600;
         border: none;
@@ -69,14 +67,14 @@
     }
 
         .btn-theme:hover {
-            /* Brightness filter handles hover state for any color */
+         
             filter: brightness(90%);
             color: #ffffff;
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
 
-    /* Links */
+   
     .link-theme {
         color: var(--accent-color, #2eca6a);
         font-weight: 600;

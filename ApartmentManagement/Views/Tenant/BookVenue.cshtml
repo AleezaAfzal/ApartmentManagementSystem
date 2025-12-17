@@ -72,7 +72,7 @@
     }
 
     <script>
-        // Simple client-side validation to ensure EndTime is after StartTime
+        
         document.getElementById('bookingForm').addEventListener('submit', function(e) {
             var startTime = document.getElementById('startTime').value;
             var endTime = document.getElementById('endTime').value;
@@ -80,7 +80,7 @@
 
             if (startTime && endTime) {
                 if (endTime <= startTime) {
-                    e.preventDefault(); // Stop form submission
+                    e.preventDefault(); 
                     errorSpan.style.display = 'block';
                 } else {
                     errorSpan.style.display = 'none';
@@ -88,7 +88,7 @@
             }
         });
 
-        // Clear error when user changes input
+       
         document.getElementById('endTime').addEventListener('change', function() {
              document.getElementById('timeError').style.display = 'none';
         });

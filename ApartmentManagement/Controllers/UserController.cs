@@ -88,7 +88,7 @@ namespace ApartmentManagement.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            // Check if user is already a tenant
+            
             var userRoles = await _userManager.GetRolesAsync(user);
             if (userRoles.Contains("Tenant"))
             {
@@ -109,7 +109,7 @@ namespace ApartmentManagement.Controllers
             _context.VisitRequests.Add(visitRequest);
             await _context.SaveChangesAsync();
 
-            // TODO: Send notification email to owner
+            
 
             TempData["Success"] = "Visit request submitted successfully. The owner will review it shortly.";
             return RedirectToAction(nameof(ApartmentDetails), new { id = apartmentId });

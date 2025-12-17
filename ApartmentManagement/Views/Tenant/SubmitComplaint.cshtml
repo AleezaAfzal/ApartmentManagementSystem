@@ -1,19 +1,19 @@
 @model ApartmentManagement.Models.Complaint
 
 @{
-    // --- LOGIC TO DETERMINE MODE (Create vs Edit) ---
+    
     bool isEdit = Model != null && Model.Id > 0;
 
     ViewData["Title"] = isEdit ? "Edit Complaint" : "Submit Complaint";
 
-    // Dynamic Text
+    
     string headingText = isEdit ? "Edit Complaint" : "Submit Complaint";
     string cardHeaderClass = isEdit ? "bg-warning text-dark" : "bg-primary text-white";
     string buttonText = isEdit ? "Update Complaint" : "Submit Complaint";
     string buttonClass = isEdit ? "btn-warning" : "btn-primary";
     string formAction = isEdit ? "Edit" : "SubmitComplaint";
 
-    // Icon logic
+    
     string icon = isEdit ? "bi-pencil-square" : "bi-exclamation-triangle-fill";
 }
 

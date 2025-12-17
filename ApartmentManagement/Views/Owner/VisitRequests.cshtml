@@ -36,7 +36,7 @@
                         {
                             foreach (var visit in Model)
                             {
-                                // Badge Logic
+                                
                                 string statusBadge = visit.Status switch
                                 {
                                     VisitStatus.Pending => "bg-warning text-dark bg-opacity-25",
@@ -157,7 +157,7 @@
                                             }
                                             else if (visit.Status == VisitStatus.Visited)
                                             {
-                                                // Check if Apartment is Rented
+                                                
                                                 bool isRented = visit.Apartment?.Status == ApartmentStatus.Rented;
 
                                                 if (isRented)
@@ -255,13 +255,13 @@
 
 @section Scripts {
     <script>
-        // Initialize Bootstrap Tooltips
+        
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
           return new bootstrap.Tooltip(tooltipTriggerEl)
         })
 
-        // Pass ID to Modals
+        
         function setModalId(id) {
             document.getElementById('modalVisitId_Suggest').value = id;
             document.getElementById('modalVisitId_Reject').value = id;

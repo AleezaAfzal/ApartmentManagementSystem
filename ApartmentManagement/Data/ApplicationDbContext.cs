@@ -24,20 +24,19 @@ namespace ApartmentManagement.Data
         {
             base.OnModelCreating(builder);
 
-            // Configure decimal precision for Apartment.Size
+            
             builder.Entity<Apartment>()
                 .Property(a => a.Size)
                 .HasPrecision(18, 2);
 
-            // Configure relationships
+           
             builder.Entity<Building>()
                 .HasMany(b => b.Apartments)
                 .WithOne(a => a.Building)
                 .HasForeignKey(a => a.BuildingId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // VisitRequests: Use NoAction to avoid cascade path conflicts
-            // (VisitRequests -> Apartments CASCADE, VisitRequests -> Users CASCADE creates conflict)
+            
             builder.Entity<Apartment>()
                 .HasMany(a => a.VisitRequests)
                 .WithOne(v => v.Apartment)
@@ -80,8 +79,7 @@ namespace ApartmentManagement.Data
                 .HasForeignKey(v => v.TenantId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Reviews: Use NoAction for Tenant to avoid cascade path conflicts
-            // (Reviews -> Tenants CASCADE, Reviews -> Apartments CASCADE creates conflict)
+            
             builder.Entity<Apartment>()
                 .HasMany(a => a.Reviews)
                 .WithOne(r => r.Apartment)

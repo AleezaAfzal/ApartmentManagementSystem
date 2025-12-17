@@ -4,7 +4,7 @@
 @{
     ViewData["Title"] = $"Apartment {Model.ApartmentNumber} Details";
 
-    // --- 1. IMAGE PROCESSING LOGIC ---
+    
     List<string> photoList = new List<string>();
     string rawPhotos = Model.Photos ?? "";
 
@@ -30,10 +30,9 @@
     }
     catch { }
 
-    // Fallback images
     if (photoList.Count == 0) photoList.Add("https://placehold.co/800x600/e2e8f0/1e293b?text=No+Preview+Available");
 
-    // Ensure distinct images for thumbnail logic
+    
     var mainImage = photoList[0];
 }
 
