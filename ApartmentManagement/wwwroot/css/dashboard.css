@@ -1,0 +1,59 @@
+/* Dashboard layout and styles inspired by provided mockup */
+:root{--sidebar-width:240px;--sidebar-collapsed-width:64px;--accent:#5b6bf5}
+body{font-family:Roboto,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;background:#f7f9fc}
+.app-sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-width);background:#fff;border-right:1px solid #eef2f6;padding:1.5rem;display:flex;flex-direction:column;z-index:1030;transition:transform .25s ease,width .2s ease}
+.app-sidebar .sidebar-brand{font-weight:700;color:var(--accent);font-size:1.2rem;margin-bottom:1.25rem}
+.sidebar-nav{display:flex;flex-direction:column;gap:.25rem}
+/* link layout */
+.sidebar-link{display:flex;align-items:center;gap:.75rem;padding:.6rem .8rem;border-radius:.6rem;color:#6b7280;text-decoration:none}
+.sidebar-link .link-icon{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px}
+.sidebar-link .link-text{white-space:nowrap}
+.sidebar-link:hover,.sidebar-link.active{background:#f5f7ff;color:var(--accent);font-weight:600}
+.sidebar-footer{margin-top:auto}
+.main.with-sidebar{margin-left:var(--sidebar-width);padding:1.5rem 2rem;transition:margin-left .25s ease}
+.main{padding:1.5rem 2rem}
+.dashboard-hero{background:linear-gradient(90deg,#5268ff,#7a7dff);color:#fff;padding:1.6rem;border-radius:12px}
+.card{border-radius:12px}
+.stat-card{background:#fff;border-radius:10px;text-align:center;padding:1rem}
+.min-w-150{min-width:150px}
+.hover-bg:hover{background-color:#f8f9fa;transition:0.15s}
+
+/* Content inner wrapper to center and constrain page content like mockup */
+.content-inner{max-width:1100px;margin:0 auto}
+.content-inner .card{box-shadow:0 6px 18px rgba(23,36,78,0.06)}
+.content-inner .card .card-header{background:transparent;border-bottom:1px solid #eef2f6}
+
+/* Collapsed state - keep sidebar mostly hidden but show compact bar */
+.app-sidebar.collapsed{transform:translateX(calc(-1 * (var(--sidebar-width) - var(--sidebar-collapsed-width))));overflow:visible}
+.app-sidebar.collapsed{width:var(--sidebar-width)}
+.app-sidebar.collapsed .sidebar-brand{opacity:0;pointer-events:none;height:0;margin:0;padding:0}
+.app-sidebar.collapsed .sidebar-link{justify-content:center;padding:.5rem 0}
+.app-sidebar.collapsed .link-text{display:none}
+.app-sidebar.collapsed .link-icon{margin:0;}
+.main.with-sidebar-collapsed{margin-left:var(--sidebar-collapsed-width)}
+
+/* sidebar toggle button */
+.sidebar-toggle{right:-16px;position:absolute;z-index:1100}
+.sidebar-toggle i{pointer-events:none}
+
+/* profile avatar sizing in topbar */
+.profile-avatar{width:42px;height:42px;font-weight:700;color:#334155}
+.profile-info{line-height:1}
+.profile-name{font-size:0.95rem}
+.profile-role{font-size:0.75rem}
+
+/* small responsive tweak */
+@media (max-width: 991.98px){
+    .app-sidebar{transform:translateX(-100%)}
+    .app-sidebar.open{transform:translateX(0)}
+    .main.with-sidebar{margin-left:0}
+    .content-inner{padding:0 12px}
+}
+
+/* Forms/buttons styling to match mockup */
+.form-control{border-radius:8px}
+.btn-primary{background:linear-gradient(90deg,#3b82f6,#2563eb);border:none}
+.btn-outline-secondary{border-radius:30px}
+
+/* subtle card inputs */
+.form-floating .form-control.bg-light{background:#f8fafc}

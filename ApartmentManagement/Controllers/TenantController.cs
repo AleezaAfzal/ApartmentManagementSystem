@@ -507,17 +507,129 @@ namespace ApartmentManagement.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Profile(Tenant model, string FullName, string PhoneNumber)
+        public async Task<IActionResult> Profile(Tenant model, string FullName, string PhoneNumber, string? Email, string? CurrentPassword, string? NewPassword, string? ConfirmPassword)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound();
 
-            user.FullName = FullName;
-            user.PhoneNumber = PhoneNumber;
-            await _userManager.UpdateAsync(user);
+            // Update basic profile fields
+            user.FullName = FullName ?? user.FullName;
+            user.PhoneNumber = PhoneNumber ?? user.PhoneNumber;
+
+            // If email changed, update email and username
+            if (!string.IsNullOrEmpty(Email) && !string.Equals(Email, user.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                var setEmailResult = await _userManager.SetEmailAsync(user, Email);
+                if (!setEmailResult.Succeeded)
+                {
+                    foreach (var err in setEmailResult.Errors) ModelState.AddModelError("Email", err.Description);
+                }
+                var setUserName = await _userManager.SetUserNameAsync(user, Email);
+                if (!setUserName.Succeeded)
+                {
+                    foreach (var err in setUserName.Errors) ModelState.AddModelError("Email", err.Description);
+                }
+            }
+
+            // Handle password change if requested
+            if (!string.IsNullOrEmpty(CurrentPassword) || !string.IsNullOrEmpty(NewPassword) || !string.IsNullOrEmpty(ConfirmPassword))
+            {
+                if (string.IsNullOrEmpty(CurrentPassword)) ModelState.AddModelError("CurrentPassword", "Current password is required to change password.");
+                if (string.IsNullOrEmpty(NewPassword)) ModelState.AddModelError("NewPassword", "New password is required.");
+                if (NewPassword != ConfirmPassword) ModelState.AddModelError("ConfirmPassword", "New password and confirmation do not match.");
+
+                if (ModelState.IsValid)
+                {
+                    var changeResult = await _userManager.ChangePasswordAsync(user, CurrentPassword!, NewPassword!);
+                    if (!changeResult.Succeeded)
+                    {
+                        foreach (var err in changeResult.Errors) ModelState.AddModelError(string.Empty, err.Description);
+                    }
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                // Re-fetch tenant to display
+                var tenant = await _context.Tenants
+                    .Include(t => t.User)
+                    .Include(t => t.Apartment!)
+                        .ThenInclude(a => a.Building)
+                    .FirstOrDefaultAsync(t => t.UserId == user.Id);
+
+                if (tenant == null) return NotFound();
+                return View(tenant);
+            }
+
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                foreach (var err in updateResult.Errors) ModelState.AddModelError(string.Empty, err.Description);
+
+                var tenant = await _context.Tenants
+                    .Include(t => t.User)
+                    .Include(t => t.Apartment!)
+                        .ThenInclude(a => a.Building)
+                    .FirstOrDefaultAsync(t => t.UserId == user.Id);
+
+                if (tenant == null) return NotFound();
+                return View(tenant);
+            }
 
             TempData["Success"] = "Profile updated successfully!";
             return RedirectToAction(nameof(Profile));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CalendarEvents(DateTime? start, DateTime? end)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Json(new List<object>());
+
+            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.UserId == user.Id);
+            if (tenant == null) return Json(new List<object>());
+
+            DateTime from = start ?? DateTime.Today.AddMonths(-1);
+            DateTime to = end ?? DateTime.Today.AddMonths(3);
+
+            var events = new List<object>();
+
+            // Payments due for this tenant
+            var payments = await _context.Payments
+                .Where(p => p.TenantId == tenant.Id && p.DueDate >= from && p.DueDate <= to)
+                .ToListAsync();
+
+            foreach (var p in payments)
+            {
+                events.Add(new
+                {
+                    id = "payment-" + p.Id,
+                    title = $"Payment Due: Rs. {p.Amount:N0}",
+                    start = p.DueDate.ToString("o"),
+                    allDay = true,
+                    color = p.Status == ApartmentManagement.Models.PaymentStatus.Unpaid ? "#f97316" : "#10b981"
+                });
+            }
+
+            // Visits for tenant's apartment
+            var visits = await _context.VisitRequests
+                .Where(v => v.UserId == user.Id && v.RequestedDate >= from && v.RequestedDate <= to)
+                .ToListAsync();
+
+            foreach (var v in visits)
+            {
+                DateTime startDt = v.RequestedDate.Date + v.RequestedTime;
+                events.Add(new
+                {
+                    id = "visit-" + v.Id,
+                    title = $"Visit: {v.RequestedTime}",
+                    start = startDt.ToString("o"),
+                    allDay = false,
+                    color = "#3b82f6"
+                });
+            }
+
+            return Json(events);
         }
     }
 }

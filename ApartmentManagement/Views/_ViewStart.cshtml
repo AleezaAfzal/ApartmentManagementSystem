@@ -1,3 +1,17 @@
 ﻿@{
-    Layout = "_Layout";
+    // Choose layout based on role: Owner and Tenant get their specific dashboards, others use default _Layout
+    var selectedLayout = "_Layout";
+    if (User?.Identity?.IsAuthenticated == true)
+    {
+        if (User.IsInRole("Owner"))
+        {
+            selectedLayout = "_OwnerLayout";
+        }
+        else if (User.IsInRole("Tenant"))
+        {
+            selectedLayout = "_TenantLayout";
+        }
+    }
+
+    Layout = selectedLayout;
 }

@@ -1,4 +1,17 @@
 @{
-    Layout = "_Layout";
+    var selectedLayout = "_Layout";
+    if (User?.Identity?.IsAuthenticated == true)
+    {
+        if (User.IsInRole("Owner"))
+        {
+            selectedLayout = "_OwnerLayout";
+        }
+        else if (User.IsInRole("Tenant"))
+        {
+            selectedLayout = "_TenantLayout";
+        }
+    }
+
+    Layout = selectedLayout;
 }
 
