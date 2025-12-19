@@ -28,14 +28,38 @@ namespace ApartmentManagement.Controllers
             _hostEnvironment = hostEnvironment;
         }
 
+        // ==========================================
+        //  FIXED DASHBOARD METHOD
+        // ==========================================
         public async Task<IActionResult> Dashboard()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound();
 
-            var buildings = await _context.Buildings
-                .Where(b => b.OwnerId == user.Id)
-                .Include(b => b.Apartments)
+            // 1. Get Pending Visits (For the Hero Card)
+            ViewBag.PendingVisits = await _context.VisitRequests
+                .Include(v => v.Apartment).ThenInclude(a => a.Building)
+                .Include(v => v.User)
+                .Where(v => v.Status == VisitStatus.Pending &&
+                            v.Apartment.Building.OwnerId == user.Id)
+                .OrderBy(v => v.RequestedDate)
+                .ToListAsync();
+
+            // 2. Get Pending Complaints (For the Side Panel)
+            ViewBag.PendingComplaints = await _context.Complaints
+                .Include(c => c.Tenant).ThenInclude(t => t.User)
+                .Include(c => c.Tenant).ThenInclude(t => t.Apartment).ThenInclude(a => a.Building)
+                .Where(c => c.Status == ComplaintStatus.Pending &&
+                            c.Tenant.Apartment.Building.OwnerId == user.Id)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
+
+            // 3. Get Upcoming Venue Bookings (For the Calendar/List)
+            ViewBag.PendingVenueBookings = await _context.VenueBookings
+                .Include(vb => vb.Tenant).ThenInclude(t => t.Apartment).ThenInclude(a => a.Building)
+                .Where(vb => vb.Tenant.Apartment.Building.OwnerId == user.Id &&
+                             vb.BookingDate >= DateTime.Today)
+                .OrderBy(vb => vb.BookingDate)
                 .ToListAsync();
 
             return View();
