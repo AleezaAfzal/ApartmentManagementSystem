@@ -29,12 +29,12 @@ Add reviews
 Owner login  
 Add building (currently only one)  
 Add apartments for rent  
-Issue bills  
+Issue bills 
+Owners can update tenants on ongoing complaint status 
 
 ## Planned Features
 Allow tenants to access more services through the portal  
-Owners can add all services and generate automatic bills  
-Owners can update tenants on ongoing complaint status  
+Owners can add all services and generate automatic bills   
 Improve usability and functionality for both tenants and owners  
 
 ## Tech Stack
